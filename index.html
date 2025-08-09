@@ -40,7 +40,7 @@
     /* -------------------- HERO (PRIMEIRA TELA) -------------------- */
     #hero{
       position:relative;
-      min-height:100svh;
+      min-height:100svh; /* certo no mobile */
       display:flex; align-items:flex-end; justify-content:center;
       padding: calc(56px + 10svh) var(--pad) calc(20svh);
       background:#000;
@@ -52,11 +52,19 @@
     }
     #heroImg{
       width:100%; height:100%;
-      object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none;
+      object-fit:cover;               /* DESKTOP */
+      user-select:none; -webkit-user-drag:none;
+      filter:none;                    /* sem escurecer */
     }
+
+    /* ===== AJUSTE MOBILE: apenas SUBIR a imagem, sem mudar o tamanho ===== */
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
-      #heroImg{ object-fit:contain; aspect-ratio:auto; object-position:center 70px; }
+      #heroImg{
+        object-fit:contain;           /* como já estava */
+        aspect-ratio:auto;            /* como já estava */
+        object-position: center 70px; /* ajuste fino vertical */
+      }
     }
 
     #hero .cta{
@@ -99,9 +107,12 @@
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .row .btn{min-width:180px}
 
-    /* confirmação no lugar dos botões de ação */
+    /* Esconde as seções até acioná-las */
+    #section-form, #section-quiz, #section-ranking{display:none}
+
+    /* ------- Confirmação inline ------- */
     .confirm-box{
-      padding:12px; border-radius:12px;
+      margin-top:14px; padding:12px; border-radius:12px;
       border:1px solid rgba(255,255,255,.08); background:#0a0f0f;
     }
     .confirm-title{font-weight:800; margin-bottom:10px;}
@@ -120,6 +131,7 @@
   <!-- PRIMEIRA TELA -->
   <section id="hero">
     <div class="bg">
+      <!-- a imagem será escolhida via JS dentre vários nomes possíveis -->
       <img id="heroImg" alt="Capa – Show do Crentão" class="hidden">
     </div>
     <div class="cta">
@@ -152,21 +164,17 @@
       <h2 id="quizPergunta">Pergunta</h2>
       <div id="quizOpcoes"></div>
 
-      <!-- Linha de ações padrão -->
-      <div id="actionRow" class="row" style="margin-top:16px">
-        <button id="btnResponder" class="btn primary">Enviar</button>
-        <button id="btnLimpar" class="btn secondary">Limpar</button>
+      <!-- Confirmação inline (AGORA SOMENTE CONFIRMAR) -->
+      <div id="confirmBox" class="confirm-box hidden">
+        <div class="confirm-title">Você tem certeza da resposta?</div>
+        <div class="row">
+          <button id="btnConfirmar" class="btn primary">Confirmar</button>
+        </div>
       </div>
 
-      <!-- Confirmação no MESMO lugar dos botões -->
-      <div id="confirmRow" class="row hidden" style="margin-top:16px">
-        <div class="confirm-box" style="flex:1 1 100%">
-          <div class="confirm-title">Você tem certeza da resposta?</div>
-          <div class="row">
-            <button id="btnConfirmar" class="btn primary">Confirmar</button>
-            <button id="btnCancelar" class="btn secondary">Cancelar</button>
-          </div>
-        </div>
+      <div class="row" id="actionRow" style="margin-top:16px">
+        <button id="btnResponder" class="btn primary">Enviar</button>
+        <button id="btnLimpar" class="btn secondary">Limpar</button>
       </div>
 
       <audio id="fxCerteza"      src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
@@ -182,6 +190,7 @@
     <section id="section-ranking" class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <h2>Ranking</h2>
+        <!-- Botão DEV aparece só quando URL tem #dev -->
         <button id="btnResetDev" class="btn secondary hidden" title="Apenas no modo dev">Limpar ranking (DEV)</button>
       </div>
       <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
@@ -201,7 +210,7 @@
   const candidatos = [
     'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
     'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
-    'img/logosc.png'
+    'img/logosc.png' // fallback
   ];
 
   function tenta(src){
@@ -209,7 +218,7 @@
       const i = new Image();
       i.onload = ()=>resolve(src);
       i.onerror = ()=>resolve(null);
-      i.src = src + '?v=' + Date.now();
+      i.src = src + '?v=' + Date.now(); // evita cache travado
     });
   }
 
@@ -249,7 +258,8 @@
   const stop = a => { try { a.pause(); a.currentTime=0; } catch(e){} };
 
   function stopAllFx(){
-    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou].forEach(stop);
+    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou]
+      .forEach(stop);
   }
   function hideAll(){
     secForm.style.display = 'none';
@@ -257,6 +267,7 @@
     secRank.style.display = 'none';
   }
 
+  // Ao clicar INICIAR: toca abertura até enviar dados
   btnStart.addEventListener('click', ()=>{
     canPlay(fxAbertura);
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
@@ -269,6 +280,7 @@
     }, 360);
   });
 
+  // Botão Ranking direto
   btnRanking.addEventListener('click', ()=>{
     stopAllFx();
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
@@ -306,10 +318,14 @@
     if(!n || !f){ alert('Preencha nome e telefone.'); return; }
     const ja = LS.get('respondidos', {});
     if(ja[f]){ alert('Este telefone já respondeu.'); return; }
+    // salva e segue para o quiz
     ja[f] = { nome:n, quando: Date.now() };
     LS.set('respondidos', ja);
     participanteAtual = { nome:n, fone:f, pontos:0 };
-    stop(fxAbertura); // para a música de abertura
+
+    // PARA a música de abertura ao enviar os dados
+    stop(fxAbertura);
+
     iniciarQuiz();
   });
 
@@ -354,15 +370,27 @@
   const actionRow  = document.getElementById('actionRow');
   const btnResp    = document.getElementById('btnResponder');
   const btnLimpar  = document.getElementById('btnLimpar');
-  const confirmRow = document.getElementById('confirmRow');
+  const confirmBox = document.getElementById('confirmBox');
   const btnConf    = document.getElementById('btnConfirmar');
-  const btnCanc    = document.getElementById('btnCancelar');
+
+  function showActions(){
+    actionRow.classList.remove('hidden');
+    btnResp.classList.remove('hidden');
+    btnLimpar.classList.remove('hidden');
+    confirmBox.classList.add('hidden');
+  }
+  function showConfirm(){
+    actionRow.classList.add('hidden');
+    btnResp.classList.add('hidden');
+    btnLimpar.classList.add('hidden');
+    confirmBox.classList.remove('hidden');
+  }
 
   function iniciarQuiz(){
     hideAll();
     secQuiz.style.display='block';
     idx = 0; escolha = null;
-    canPlay(fxEntendeu);
+    canPlay(fxEntendeu); // "Você entendeu a pergunta?"
     renderPergunta();
   }
 
@@ -370,9 +398,7 @@
     const p = perguntas[idx];
     elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
     elOps.innerHTML = '';
-    // garante linhas corretas visíveis
-    confirmRow.classList.add('hidden');
-    actionRow.classList.remove('hidden');
+    showActions();
 
     p.opcoes.forEach((txt,i)=>{
       const id = `op${idx}_${i}`;
@@ -386,37 +412,30 @@
     });
   }
 
-  // ENVIAR → esconde botões, mostra confirmação no mesmo lugar + áudios
+  // ENVIAR → esconde botões, mostra SÓ "Confirmar" e toca sequência
   btnResp.addEventListener('click', ()=>{
-    if(escolha===null){ canPlay(fxCerteza); return; }
-    actionRow.classList.add('hidden');
-    confirmRow.classList.remove('hidden');
-    canPlay(fxCerteza);                   // "Você tem certeza?"
-    setTimeout(()=>canPlay(fxEstaCerto), 600); // "Está certo disso?"
+    if(escolha===null){ canPlay(fxCerteza); return; } // avisa que falta marcar
+    showConfirm();
+    // sequência: tem certeza? -> está certo disso? -> qual é a resposta certa?
+    canPlay(fxCerteza);
+    setTimeout(()=>canPlay(fxEstaCerto), 700);
+    setTimeout(()=>canPlay(fxQualResposta), 1400);
   });
 
-  // CANCELAR → volta botões
-  btnCanc.addEventListener('click', ()=>{
-    confirmRow.classList.add('hidden');
-    actionRow.classList.remove('hidden');
-  });
-
-  // CONFIRMAR → toca "Qual é a resposta certa?" e avalia
+  // CONFIRMAR → avalia
   btnConf.addEventListener('click', ()=>{
-    canPlay(fxQualResposta);
-    setTimeout(()=>{
-      const p = perguntas[idx];
-      const ok = (escolha===p.certa);
-      if(ok){ participanteAtual.pontos++; canPlay(fxCerta); }
-      else { canPlay(fxErrou); }
-      idx++; escolha=null;
+    const p = perguntas[idx];
+    const ok = (escolha===p.certa);
+    if(ok){ participanteAtual.pontos++; canPlay(fxCerta); }
+    else  { canPlay(fxErrou); }
 
-      if(idx<perguntas.length){
-        setTimeout(()=>{ canPlay(fxEntendeu); renderPergunta(); }, 800);
-      } else {
-        finalizar();
-      }
-    }, 900);
+    idx++; escolha=null;
+
+    if(idx<perguntas.length){
+      setTimeout(()=>{ canPlay(fxEntendeu); renderPergunta(); }, 800);
+    } else {
+      finalizar();
+    }
   });
 
   btnLimpar.addEventListener('click', ()=>{
@@ -428,8 +447,10 @@
   function finalizar(){
     const rank = LS.get('ranking', []);
     rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: participanteAtual.pontos, quando: Date.now() });
+    // ordena: maior pontuação primeiro, empate pelo mais cedo
     rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
+
     hideAll();
     secRank.style.display='block';
     renderRanking();
@@ -449,7 +470,8 @@
     btnResetDev.classList.remove('hidden');
     btnResetDev.addEventListener('click', ()=>{
       if (confirm('Apagar todos os resultados do ranking neste navegador?')) {
-        LS.del('ranking'); LS.del('respondidos');
+        LS.del('ranking');
+        LS.del('respondidos');
         renderRanking();
         alert('Ranking limpo (apenas neste navegador).');
       }
@@ -460,3 +482,4 @@
 </script>
 </body>
 </html>
+
