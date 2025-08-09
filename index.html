@@ -63,7 +63,7 @@
       #heroImg{
         object-fit:contain;           /* como já estava */
         aspect-ratio:auto;            /* como já estava */
-        object-position: center 70px;  /* << sobe a arte sem alterar o tamanho */
+        object-position: center 70px; /* ajuste fino vertical */
       }
     }
 
@@ -109,6 +109,13 @@
 
     /* Esconde as seções até acioná-las */
     #section-form, #section-quiz, #section-ranking{display:none}
+
+    /* ------- Confirmação inline ------- */
+    .confirm-box{
+      margin-top:14px; padding:12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.08); background:#0a0f0f;
+    }
+    .confirm-title{font-weight:800; margin-bottom:10px;}
   </style>
 </head>
 <body>
@@ -156,23 +163,37 @@
     <section id="section-quiz" class="card">
       <h2 id="quizPergunta">Pergunta</h2>
       <div id="quizOpcoes"></div>
+
+      <!-- Confirmação inline -->
+      <div id="confirmBox" class="confirm-box hidden">
+        <div class="confirm-title">Você tem certeza da resposta?</div>
+        <div class="row">
+          <button id="btnConfirmar" class="btn primary">Confirmar</button>
+          <button id="btnCancelar" class="btn secondary">Cancelar</button>
+        </div>
+      </div>
+
       <div class="row" style="margin-top:16px">
         <button id="btnResponder" class="btn primary">Enviar</button>
         <button id="btnLimpar" class="btn secondary">Limpar</button>
       </div>
 
-      <audio id="fxCerteza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
-      <audio id="fxEntendeu" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
-      <audio id="fxEstaCerto" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
+      <audio id="fxCerteza"      src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
+      <audio id="fxEntendeu"     src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
+      <audio id="fxEstaCerto"    src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
       <audio id="fxQualResposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
-      <audio id="fxCertaResposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
-      <audio id="fxErrou" src="audio/faustao-errou.mp3" preload="auto"></audio>
-      <audio id="fxAbertura" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
+      <audio id="fxCertaResposta"src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
+      <audio id="fxErrou"        src="audio/faustao-errou.mp3" preload="auto"></audio>
+      <audio id="fxAbertura"     src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
     </section>
 
     <!-- RANKING -->
     <section id="section-ranking" class="card">
-      <h2>Ranking</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <h2>Ranking</h2>
+        <!-- Botão DEV aparece só quando URL tem #dev -->
+        <button id="btnResetDev" class="btn secondary hidden" title="Apenas no modo dev">Limpar ranking (DEV)</button>
+      </div>
       <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
       <div class="row" style="margin-top:16px">
         <button id="btnVoltar" class="btn secondary">Voltar</button>
@@ -190,7 +211,7 @@
   const candidatos = [
     'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
     'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
-    'img/logosc.png' // fallback (o logo que você me mandou)
+    'img/logosc.png' // fallback
   ];
 
   function tenta(src){
@@ -212,7 +233,6 @@
       heroImg.src = achou;
       heroImg.classList.remove('hidden');
     } else {
-      // sem imagem: mantém fundo preto mesmo (sem aviso na tela)
       hero.style.background = '#000';
     }
   })();
@@ -234,31 +254,38 @@
   const fxCerta        = document.getElementById('fxCertaResposta');
   const fxErrou        = document.getElementById('fxErrou');
 
+  const $ = sel => document.querySelector(sel);
+  const byId = id => document.getElementById(id);
+  const canPlay = a => { try { a.currentTime=0; a.play().catch(()=>{}); } catch(e){} };
+  const stop = a => { try { a.pause(); a.currentTime=0; } catch(e){} };
+
+  function stopAllFx(){
+    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou]
+      .forEach(stop);
+  }
+
   function hideAll(){
     secForm.style.display = 'none';
     secQuiz.style.display = 'none';
     secRank.style.display = 'none';
   }
-  function stopAllFx(){
-    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou]
-      .forEach(a=>{ try{a.pause(); a.currentTime=0;}catch(_){}});
-  }
 
+  // Ao clicar INICIAR: toca abertura até enviar dados
   btnStart.addEventListener('click', ()=>{
-    // anima “sumir” a primeira tela
+    canPlay(fxAbertura);
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
     hero.style.transform  = 'translateY(-8px)';
     hero.style.opacity    = '0';
     setTimeout(()=>{
       hero.style.display='none';
-      // abre o form
       hideAll();
       secForm.style.display='block';
     }, 360);
-    stopAllFx();
   });
 
+  // Botão Ranking direto
   btnRanking.addEventListener('click', ()=>{
+    stopAllFx();
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
     hero.style.transform  = 'translateY(-8px)';
     hero.style.opacity    = '0';
@@ -268,7 +295,6 @@
       secRank.style.display='block';
       renderRanking();
     }, 360);
-    stopAllFx();
   });
 
   btnVoltar.addEventListener('click', ()=>{
@@ -283,8 +309,11 @@
 
   const LS = {
     get: (k,def)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch(_){return def} },
-    set: (k,v)=>localStorage.setItem(k, JSON.stringify(v))
+    set: (k,v)=>localStorage.setItem(k, JSON.stringify(v)),
+    del: (k)=>localStorage.removeItem(k)
   };
+
+  let participanteAtual = null;
 
   btnEnviarDados.addEventListener('click', ()=>{
     const n = (nome.value||'').trim();
@@ -296,6 +325,10 @@
     ja[f] = { nome:n, quando: Date.now() };
     LS.set('respondidos', ja);
     participanteAtual = { nome:n, fone:f, pontos:0 };
+
+    // PARA a música de abertura ao enviar os dados
+    stop(fxAbertura);
+
     iniciarQuiz();
   });
 
@@ -333,19 +366,21 @@
     }
   ];
 
-  let participanteAtual = null;
   let idx = 0, escolha = null;
 
-  const elPerg = document.getElementById('quizPergunta');
-  const elOps  = document.getElementById('quizOpcoes');
-  const btnResp= document.getElementById('btnResponder');
-  const btnLimpar = document.getElementById('btnLimpar');
+  const elPerg     = document.getElementById('quizPergunta');
+  const elOps      = document.getElementById('quizOpcoes');
+  const btnResp    = document.getElementById('btnResponder');
+  const btnLimpar  = document.getElementById('btnLimpar');
+  const confirmBox = document.getElementById('confirmBox');
+  const btnConf    = document.getElementById('btnConfirmar');
+  const btnCanc    = document.getElementById('btnCancelar');
 
   function iniciarQuiz(){
     hideAll();
     secQuiz.style.display='block';
     idx = 0; escolha = null;
-    fxEntendeu.play().catch(()=>{});
+    canPlay(fxEntendeu); // "Você entendeu a pergunta?"
     renderPergunta();
   }
 
@@ -353,6 +388,8 @@
     const p = perguntas[idx];
     elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
     elOps.innerHTML = '';
+    confirmBox.classList.add('hidden');
+
     p.opcoes.forEach((txt,i)=>{
       const id = `op${idx}_${i}`;
       const li = document.createElement('label');
@@ -365,21 +402,40 @@
     });
   }
 
+  // Botão ENVIAR → mostra confirmação
   btnResp.addEventListener('click', ()=>{
-    if(escolha===null){ fxCerteza.play().catch(()=>{}); return; }
-    // Confirmação estilo Show do Milhão
-    fxEstaCerto.play().catch(()=>{});
+    if(escolha===null){ canPlay(fxCerteza); return; } // reaproveito "tem certeza?" como aviso de seleção faltante
+    // Mostra a confirmação e toca "Você tem certeza?"
+    confirmBox.classList.remove('hidden');
+    canPlay(fxCerteza);
+  });
+
+  // CONFIRMAR → toca "Qual é a resposta certa?" e avalia
+  btnConf.addEventListener('click', ()=>{
+    confirmBox.classList.add('hidden');
+    canPlay(fxQualResposta);
+
     setTimeout(()=>{
       const p = perguntas[idx];
       const ok = (escolha===p.certa);
-      if(ok){ participanteAtual.pontos++; fxCerta.play().catch(()=>{}); }
-      else { fxErrou.play().catch(()=>{}); }
-      // próxima
+      if(ok){ participanteAtual.pontos++; canPlay(fxCerta); }
+      else { canPlay(fxErrou); }
+
       idx++;
       escolha=null;
-      if(idx<perguntas.length) renderPergunta();
-      else finalizar();
+      if(idx<perguntas.length){
+        // pequena pausa antes da próxima
+        setTimeout(()=>{ canPlay(fxEntendeu); renderPergunta(); }, 700);
+      } else {
+        finalizar();
+      }
     }, 900);
+  });
+
+  // CANCELAR → fecha confirmação sem avaliar
+  btnCanc.addEventListener('click', ()=>{
+    confirmBox.classList.add('hidden');
+    // opcional: "Você está certo disso?" ao cancelar (mantive silencioso)
   });
 
   btnLimpar.addEventListener('click', ()=>{
@@ -387,13 +443,14 @@
     escolha=null;
   });
 
+  /* --------------- Finalização + Ranking --------------- */
   function finalizar(){
-    // grava no ranking
     const rank = LS.get('ranking', []);
     rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: participanteAtual.pontos, quando: Date.now() });
     // ordena: maior pontuação primeiro, empate pelo mais cedo
     rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
+
     hideAll();
     secRank.style.display='block';
     renderRanking();
@@ -407,7 +464,22 @@
     box.innerHTML = linhas.map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join('');
   }
 
+  /* --------------- Modo DEV: reset do ranking (oculto) --------------- */
+  const btnResetDev = document.getElementById('btnResetDev');
+  if (location.hash === '#dev') {
+    btnResetDev.classList.remove('hidden');
+    btnResetDev.addEventListener('click', ()=>{
+      if (confirm('Apagar todos os resultados do ranking neste navegador?')) {
+        LS.del('ranking');
+        LS.del('respondidos');
+        renderRanking();
+        alert('Ranking limpo (apenas neste navegador).');
+      }
+    });
+  }
+
 })();
 </script>
 </body>
 </html>
+
