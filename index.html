@@ -6,158 +6,73 @@
   <title>Show do Crentão — Sobrenatural Church</title>
   <meta name="color-scheme" content="dark">
   <style>
-    /* ======== TEMA ======== */
     :root{
-      --bg:#000;
-      --text:#fff;
-      --muted:#cbd5e1;
-
-      /* Paleta baseada na sua arte */
-      --green:#1bd39b;         /* botão iniciar */
-      --green-deep:#12b37f;
-      --ring:#29f0b6;
-
-      --white:#ffffff;         /* botão ranking */
-      --ink:#0b0f12;
-
-      --panel:#050a0a;
-      --panel-2:#071313;
-      --border:#0c1f1d;
-
-      --ok:#22c55e;
-      --error:#ef4444;
+      --bg:#000; --text:#fff; --muted:#cbd5e1;
+      --green:#1bd39b; --green-deep:#12b37f; --ring:#29f0b6;
+      --white:#ffffff; --ink:#0b0f12;
+      --panel:#050a0a; --panel-2:#071313; --border:#0c1f1d;
+      --ok:#22c55e; --error:#ef4444;
     }
-
     *{box-sizing:border-box}
-    html,body{
-      margin:0; min-height:100%;
-      background:var(--bg); color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;
-      line-height:1.45;
-    }
-
-    /* ======== CAPA / FUNDO ======== */
+    html,body{margin:0;min-height:100%;background:#000;color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;line-height:1.45}
+    /* FUNDO (a sua arte é o BACKGROUND) */
     body::before{
       content:""; position:fixed; inset:0; z-index:-2;
-      background:
-        linear-gradient(180deg,rgba(0,0,0,.65),rgba(0,0,0,.86)),
-        radial-gradient(1000px 500px at 50% 0%, rgba(27,211,155,.08), transparent 60%),
-        #000;
-      background-size:cover;
-    }
-    body.has-cover::before{
       background:
         linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.9)),
         url("img/cover.png") center/cover no-repeat;
     }
-
     main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
 
-    /* ======== HERO (PAINEL INICIAL) ======== */
+    /* HERO */
     .hero{
       margin:48px auto 24px; max-width:980px;
-      background:rgba(0,0,0,.72);
-      border:1px solid #0b1714; border-radius:20px;
+      background:rgba(0,0,0,.72); border:1px solid #0b1714; border-radius:20px;
       box-shadow:0 18px 45px rgba(0,0,0,.55);
-      padding:28px 28px 32px;
-      display:grid; gap:18px; justify-items:center; text-align:center;
+      padding:28px 28px 32px; display:grid; gap:18px; justify-items:center; text-align:center;
       transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s ease;
     }
     .hero h1{margin:0; font-size:clamp(1.6rem,1rem + 2.6vw,2.8rem)}
     .sub{color:var(--muted)}
+    .actions{display:grid; gap:18px; grid-template-columns:1fr 1fr; width:min(820px,100%)}
+    @media (max-width:720px){ .actions{grid-template-columns:1fr} }
 
-    /* BOTÕES – layout e responsividade */
-    .actions{
-      display:grid; gap:18px;
-      grid-template-columns:1fr 1fr;
-      width:min(820px,100%);
-    }
-    @media (max-width:720px){
-      .actions{ grid-template-columns:1fr; }
-    }
-
-    .btn{
-      appearance:none; border:0; cursor:pointer;
-      padding:18px 20px; border-radius:12px;
-      font-weight:1000; letter-spacing:.02em;
-      text-align:center; text-transform:uppercase;
+    .btn{appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
+      font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
       font-size:clamp(1rem,.6rem + 1.4vw,1.6rem);
-      transition:transform .06s ease, box-shadow .2s ease, background .2s, filter .2s;
-    }
-
-    /* INICIAR (verde) */
-    .btn.start{
-      color:#02110c;
-      background:linear-gradient(180deg,var(--green),var(--green-deep));
+      transition:transform .06s ease, box-shadow .2s ease, filter .2s}
+    .btn.start{color:#02110c;background:linear-gradient(180deg,var(--green),var(--green-deep));
       box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
-      border:1px solid #10d49f;
-    }
-    .btn.start:hover{ filter:saturate(1.15) brightness(1.02) }
-    .btn.start:active{ transform:translateY(1px) }
+      border:1px solid #10d49f}
+    .btn.start:hover{filter:saturate(1.15) brightness(1.02)}
+    .btn.start:active{transform:translateY(1px)}
+    .btn.rank{color:var(--ink);background:var(--white);border:1px solid #dfe7e4;box-shadow:0 6px 16px rgba(255,255,255,.08)}
+    .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
+    .btn.rank:active{transform:translateY(1px)}
 
-    /* RANKING (branco) */
-    .btn.rank{
-      color:var(--ink);
-      background:var(--white);
-      border:1px solid #dfe7e4;
-      box-shadow:0 6px 16px rgba(255,255,255,.08);
+    /* LOGO NO CANTO (apenas DEPOIS do clique) */
+    .logo-badge{
+      position:fixed; right:20px; top:16px; width:min(320px,38vw);
+      z-index:4; pointer-events:none; opacity:0; transform:translateY(-8px) scale(.98);
+      transition:opacity .45s ease, transform .45s ease;
+      display:none; /* não aparece na tela inicial */
     }
-    .btn.rank:hover{
-      box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45);
-    }
-    .btn.rank:active{ transform:translateY(1px) }
+    .app-started .logo-badge{ display:block; }
+    .app-started .logo-badge.show{ opacity:.95; transform:none; }
 
-    /* ======== LOGO CENTRAL (sobe para o canto) ======== */
-    .logo-overlay{
-      position:fixed; left:50%; top:42%;
-      transform:translate(-50%,-50%);
-      width:min(640px,88vw);
-      z-index:3; pointer-events:none; opacity:.98;
-      transition:
-        left .6s cubic-bezier(.2,.8,.2,1),
-        top .6s cubic-bezier(.2,.8,.2,1),
-        transform .6s cubic-bezier(.2,.8,.2,1),
-        width .6s cubic-bezier(.2,.8,.2,1),
-        opacity .6s ease;
-    }
-    .app-started .logo-overlay{
-      left:auto; right:20px; top:16px;
-      transform:none; width:min(320px,38vw); opacity:.95;
-    }
-
-    /* Fallback em texto se não existir show-logo.png */
-    .logo-fallback{
-      position:fixed; left:50%; top:42%;
-      transform:translate(-50%,-50%);
-      z-index:3; pointer-events:none; opacity:.98;
-      font-weight:1000; text-align:center;
-      font-size:clamp(1.8rem,1rem + 4vw,3.4rem);
-      text-shadow:0 6px 18px rgba(0,0,0,.65);
-      transition:left .6s, top .6s, transform .6s, opacity .6s, font-size .6s;
-    }
-    .logo-fallback .tag{
-      display:inline-block; margin-top:8px; padding:8px 14px;
-      background:#1e8d64; border:1px solid #10d49f; border-radius:12px;
-      transform:skewX(-8deg);
-    }
-    .app-started .logo-fallback{
-      left:auto; right:24px; top:18px; transform:none;
-      font-size:clamp(1.2rem,.6rem + 2.5vw,2rem);
-    }
-
-    /* ======== APPBAR (logo igreja à esquerda) ======== */
+    /* APPBAR (logo da igreja à esquerda) */
     header.appbar{
-      position:sticky; top:0; z-index:5;
-      padding:10px 16px; border-bottom:1px solid #0b1b19;
-      background:rgba(0,0,0,.55); backdrop-filter: blur(6px);
+      position:sticky; top:0; z-index:5; padding:10px 16px;
+      border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
       display:none; align-items:center; justify-content:space-between; gap:12px;
     }
     .app-started header.appbar{ display:flex; }
-    .brand-left{display:flex; align-items:center; gap:10px}
-    .brand-left img{height:38px; object-fit:contain; filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
-    .brand-right{font-weight:900; letter-spacing:.02em; color:#eafff7}
+    .brand-left{display:flex;align-items:center;gap:10px}
+    .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
+    .brand-right{font-weight:900;letter-spacing:.02em;color:#eafff7}
 
-    /* ======== TELAS ======== */
+    /* CARTÕES E QUIZ */
     .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
@@ -183,50 +98,36 @@
     .rank-pos{width:42px;height:42px;display:grid;place-items:center;background:#081716;border-radius:10px;border:1px solid #0f2a26}
     .score{font-weight:900}
 
-    /* ======== ESTADOS DE ANIMAÇÃO ======== */
     .hero.hide-out{opacity:0; transform:translateY(-18px) scale(.98); pointer-events:none}
     .app-started .hero{display:none}
   </style>
 </head>
-<body class="has-cover">
-  <!-- LOGO CENTRAL QUE SOBE PARA O CANTO DIREITO -->
-  <img id="showLogoImg" class="logo-overlay" src="img/show-logo.png" alt="Show do Crentão"
-       onerror="this.style.display='none';document.getElementById('showLogoFallback').style.display='block'">
-  <div id="showLogoFallback" class="logo-fallback" style="display:none">
-    <div>SHOW DO</div>
-    <div class="tag">CRENTÃO</div>
-  </div>
+<body>
+  <!-- LOGO compacta para o canto (só aparece DEPOIS do clique) -->
+  <img id="logoBadge" class="logo-badge" src="img/show-logo.png" alt="Show do Crentão">
 
-  <!-- APPBAR (aparece depois da animação) -->
+  <!-- APPBAR -->
   <header class="appbar">
-    <div class="brand-left">
-      <img src="img/logo.png" alt="Sobrenatural Church" />
-    </div>
+    <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
     <div class="brand-right">Show do Crentão</div>
   </header>
 
   <main>
-    <!-- PAINEL INICIAL -->
+    <!-- CAPA -->
     <section id="hero" class="hero">
       <h1>Show do Crentão</h1>
       <div class="sub">Bem-vindo! Escolha uma opção abaixo.</div>
       <div class="actions">
         <button id="goParticipar" class="btn start">Iniciar</button>
-        <button id="goRanking" class="btn rank">Ranking</button>
+        <button id="goRanking"   class="btn rank">Ranking</button>
       </div>
     </section>
 
     <!-- CADASTRO -->
     <section id="screen-register" class="card grid hidden">
       <h2>Dados do participante</h2>
-      <div>
-        <label for="nome">Nome completo</label>
-        <input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name">
-      </div>
-      <div>
-        <label for="fone">Telefone (com DDD)</label>
-        <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel">
-      </div>
+      <div><label for="nome">Nome completo</label><input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name"></div>
+      <div><label for="fone">Telefone (com DDD)</label><input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel"></div>
       <div class="notice muted">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
       <div><button id="btnSendRegister" class="btn start">Enviar</button></div>
       <div id="msgRegister" class="notice hidden"></div>
@@ -260,211 +161,150 @@
   </main>
 
   <!-- ÁUDIOS -->
-  <audio id="sfx-intro" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
-  <audio id="sfx-pergunta" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
-  <audio id="sfx-certeza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
-  <audio id="sfx-esta-certo" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
-  <audio id="sfx-qual-resposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
-  <audio id="sfx-certa-resposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
-  <audio id="sfx-errou" src="audio/faustao-errou.mp3" preload="auto"></audio>
+  <audio id="sfx-intro"        src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
+  <audio id="sfx-pergunta"     src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3"   preload="auto"></audio>
+  <audio id="sfx-certeza"      src="audio/silvio-santos-voce-tem-certeza.mp3"           preload="auto"></audio>
+  <audio id="sfx-esta-certo"   src="audio/silvio-santos-esta-certo-disso.mp3"           preload="auto"></audio>
+  <audio id="sfx-qual-resposta"src="audio/silvio-santos-qual-e-a-resposta-certa.mp3"    preload="auto"></audio>
+  <audio id="sfx-certa-resposta"src="audio/silvio-santos-certa-resposta.mp3"            preload="auto"></audio>
+  <audio id="sfx-errou"        src="audio/faustao-errou.mp3"                             preload="auto"></audio>
 
   <script>
-    /* ====== UTIL ====== */
-    const QUIZ_VERSION = 'v6-iniciar-ranking';
-    const STORAGE_KEY = 'discipulado_quiz_' + QUIZ_VERSION;
+    /* ====== STORAGE / UTILS ====== */
+    const QUIZ_VERSION='v6b-bg-fixo'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
     const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-    function loadAll(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : { submissions: [] }; } catch(e){ return { submissions: [] }; } }
+    function loadAll(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):{submissions:[]}; }catch(e){ return {submissions:[]};}}
     function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
     function show(id){ ['screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
 
-    /* Detecta capa */
-    (function checkCover(){
-      const img = new Image();
-      img.onload = ()=> document.body.classList.add('has-cover');
-      img.onerror = ()=> document.body.classList.remove('has-cover');
-      img.src = 'img/cover.png';
-    })();
+    /* ÁUDIO INTRO */
+    const intro=$('sfx-intro');
+    const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
+    const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
 
-    /* ====== ÁUDIO INTRO ====== */
-    const intro = $('sfx-intro');
-    const stopIntro = () => { try { intro.pause(); intro.currentTime = 0; } catch(e){} };
-    const startIntro = () => { try { intro.currentTime = 0; intro.play().catch(()=>{}); } catch(e){} };
-
-    /* ====== ANIMAÇÃO DO HERO/LOGOS ====== */
+    /* ANIMAÇÃO DE ENTRADA (tira o painel e mostra o logo no canto) */
     function startAppFlow(next){
-      const hero = $('hero');
-      hero.classList.add('hide-out');
-      document.body.classList.add('app-started'); // move o logo e mostra o appbar
+      const hero=$('hero'); hero.classList.add('hide-out');
+      document.body.classList.add('app-started');              // mostra appbar
+      const badge=$('logoBadge');                              // exibe logo no canto
+      setTimeout(()=>{ badge.classList.add('show'); }, 50);
       setTimeout(next, 580);
     }
 
-    /* ====== NAVEGAÇÃO ====== */
-    $('goParticipar').addEventListener('click', ()=>{
-      startIntro();             // música ao clicar INICIAR
-      startAppFlow(()=> { show('screen-register'); });
-    });
-    $('goRanking').addEventListener('click', ()=>{
-      stopIntro();              // sem música no ranking
-      startAppFlow(()=> { renderRanking(); show('screen-ranking'); });
-    });
+    /* NAVEGAÇÃO INICIAL */
+    $('goParticipar').addEventListener('click', ()=>{ startIntro(); startAppFlow(()=> show('screen-register'));});
+    $('goRanking').addEventListener('click',   ()=>{ stopIntro();  startAppFlow(()=>{ renderRanking(); show('screen-ranking');});});
 
     function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
     function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
 
-    /* ====== CADASTRO ====== */
-    $('btnSendRegister').addEventListener('click', () => {
-      const name = titleCase(($('nome').value||''));
-      const phoneRaw = normPhone(($('fone').value||''));
-      const box = $('msgRegister'); clearMsg(box);
-      if (!name || name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
-      if (!phoneRaw || phoneRaw.length<10) return setMsg(box,'Informe um telefone válido com DDD.','warn');
-
-      const all = loadAll();
-      if (all.submissions.some(s => s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw)){
-        return setMsg(box, 'Você já respondeu este quiz e não pode responder novamente.', 'error');
-      }
-
-      stopIntro(); // para a música ao enviar
-      sessionStorage.setItem('quiz_participant', JSON.stringify({ name, phone: phoneRaw, startedAt: nowISO() }));
-      quizState.index = 0; quizState.correct = 0; quizState.selected = null;
-      renderCurrentQuestion();
-      show('screen-quiz');
+    /* CADASTRO */
+    $('btnSendRegister').addEventListener('click', ()=>{
+      const name=titleCase(($('nome').value||'')); const phoneRaw=normPhone(($('fone').value||'')); const box=$('msgRegister'); clearMsg(box);
+      if(!name||name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
+      if(!phoneRaw||phoneRaw.length<10) return setMsg(box,'Informe um telefone válido com DDD.','warn');
+      const all=loadAll();
+      if(all.submissions.some(s=>s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw))
+        return setMsg(box,'Você já respondeu este quiz e não pode responder novamente.','error');
+      stopIntro(); // PARA música ao enviar
+      sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
+      quizState.index=0; quizState.correct=0; quizState.selected=null;
+      renderCurrentQuestion(); show('screen-quiz');
     });
 
-    /* ====== QUIZ ====== */
-    const QUESTIONS = [
-      { title: "O que caracteriza a obediência imediata?",
-        options: ["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],
-        correctIndex: 1 },
-      { title: "O que é fé genuína segundo o estudo?",
-        options: ["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
-        correctIndex: 2 },
-      { title: "Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
-        options: ["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],
-        correctIndex: 1 },
-      { title: "Qual é a importância de testemunhar as obras de Deus?",
-        options: ["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],
-        correctIndex: 1 }
+    /* QUIZ */
+    const QUESTIONS=[
+      {title:"O que caracteriza a obediência imediata?",
+       options:["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],correctIndex:1},
+      {title:"O que é fé genuína segundo o estudo?",
+       options:["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],correctIndex:2},
+      {title:"Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
+       options:["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],correctIndex:1},
+      {title:"Qual é a importância de testemunhar as obras de Deus?",
+       options:["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],correctIndex:1}
     ];
-
-    const quizState = { index: 0, correct: 0, selected: null };
+    const quizState={index:0, correct:0, selected:null};
 
     function renderCurrentQuestion(){
-      stopIntro(); // garantia
-      const step = $('quizStep'); step.innerHTML='';
-      const q = QUESTIONS[quizState.index];
-      const wrap = document.createElement('div'); wrap.className='grid';
-      const title = document.createElement('div'); title.className='q-title'; title.textContent = `Pergunta ${quizState.index+1} de ${QUESTIONS.length}: ` + q.title;
-      const qsBox = document.createElement('div'); qsBox.className='q';
-      q.options.forEach((opt, oi)=>{
-        const lbl = document.createElement('label'); lbl.className='opt';
-        const inp = document.createElement('input'); inp.type='radio'; inp.name='alt'; inp.value=oi;
-        inp.addEventListener('change', ()=> quizState.selected = oi);
-        const span = document.createElement('span'); span.textContent = opt;
-        lbl.appendChild(inp); lbl.appendChild(span); qsBox.appendChild(lbl);
-      });
-      const row = document.createElement('div'); row.className='grid-2';
-      const btnEnviar = document.createElement('button'); btnEnviar.className='btn start'; btnEnviar.textContent='Enviar';
-      const btnLimpar = document.createElement('button'); btnLimpar.className='btn rank'; btnLimpar.textContent='Limpar';
+      stopIntro();
+      const step=$('quizStep'); step.innerHTML='';
+      const q=QUESTIONS[quizState.index];
+      const wrap=document.createElement('div'); wrap.className='grid';
+      const title=document.createElement('div'); title.className='q-title'; title.textContent=`Pergunta ${quizState.index+1} de ${QUESTIONS.length}: `+q.title;
+      const qsBox=document.createElement('div'); qsBox.className='q';
+      q.options.forEach((opt,oi)=>{ const lbl=document.createElement('label'); lbl.className='opt';
+        const inp=document.createElement('input'); inp.type='radio'; inp.name='alt'; inp.value=oi; inp.addEventListener('change',()=> quizState.selected=oi);
+        const span=document.createElement('span'); span.textContent=opt; lbl.appendChild(inp); lbl.appendChild(span); qsBox.appendChild(lbl); });
+      const row=document.createElement('div'); row.className='grid-2';
+      const btnEnviar=document.createElement('button'); btnEnviar.className='btn start'; btnEnviar.textContent='Enviar';
+      const btnLimpar=document.createElement('button'); btnLimpar.className='btn rank'; btnLimpar.textContent='Limpar';
       row.appendChild(btnEnviar); row.appendChild(btnLimpar);
-
-      const fb = document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
-
-      wrap.appendChild(title); wrap.appendChild(qsBox); wrap.appendChild(row); wrap.appendChild(fb);
-      step.appendChild(wrap);
-
-      btnLimpar.addEventListener('click', ()=>{
-        quizState.selected = null; qsBox.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false);
-      });
-
-      btnEnviar.addEventListener('click', ()=>{
-        if (quizState.selected === null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return; }
-        askConfirmation(fb, () => { evaluateAnswer(fb); });
-      });
-
+      const fb=document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
+      wrap.appendChild(title); wrap.appendChild(qsBox); wrap.appendChild(row); wrap.appendChild(fb); step.appendChild(wrap);
+      btnLimpar.addEventListener('click',()=>{ quizState.selected=null; qsBox.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false); });
+      btnEnviar.addEventListener('click',()=>{ if(quizState.selected===null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return;}
+        askConfirmation(fb, ()=> evaluateAnswer(fb)); });
       playOne(['sfx-pergunta']);
     }
 
-    function askConfirmation(container, onConfirm){
-      playOne(Math.random() < 0.5 ? ['sfx-certeza'] : ['sfx-esta-certo']);
+    function askConfirmation(container,onConfirm){
+      playOne(Math.random()<0.5?['sfx-certeza']:['sfx-esta-certo']);
       container.className='feedback fx'; container.innerHTML='';
-      const p = document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
-      const row = document.createElement('div'); row.className='grid-2';
-      const btnConf = document.createElement('button'); btnConf.className='btn start'; btnConf.textContent='Confirmar';
-      const btnCanc = document.createElement('button'); btnCanc.className='btn rank'; btnCanc.textContent='Cancelar';
-      row.appendChild(btnConf); row.appendChild(btnCanc);
-      container.appendChild(p); container.appendChild(row);
-      container.classList.remove('hidden');
-      btnConf.addEventListener('click', onConfirm);
-      btnCanc.addEventListener('click', ()=> { container.classList.add('hidden'); container.innerHTML=''; });
+      const p=document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
+      const row=document.createElement('div'); row.className='grid-2';
+      const btnConf=document.createElement('button'); btnConf.className='btn start'; btnConf.textContent='Confirmar';
+      const btnCanc=document.createElement('button'); btnCanc.className='btn rank'; btnCanc.textContent='Cancelar';
+      row.appendChild(btnConf); row.appendChild(btnCanc); container.appendChild(p); container.appendChild(row); container.classList.remove('hidden');
+      btnConf.addEventListener('click',onConfirm); btnCanc.addEventListener('click',()=>{container.classList.add('hidden');container.innerHTML='';});
     }
 
     function simpleConfetti(container){
-      for(let i=0;i<22;i++){
-        const c = document.createElement('div'); c.className='confetti'; c.style.left='50%'; c.style.setProperty('--x', (Math.random()*200-100).toFixed(0));
-        c.style.background = `hsl(${Math.floor(Math.random()*360)},100%,70%)`;
-        c.style.animationDuration = (1+Math.random()*0.8).toFixed(2)+'s';
-        container.appendChild(c); setTimeout(()=> c.remove(), 1700);
-      }
+      for(let i=0;i<22;i++){ const c=document.createElement('div'); c.className='confetti'; c.style.left='50%'; c.style.setProperty('--x',(Math.random()*200-100).toFixed(0));
+        c.style.background=`hsl(${Math.floor(Math.random()*360)},100%,70%)`; c.style.animationDuration=(1+Math.random()*0.8).toFixed(2)+'s';
+        container.appendChild(c); setTimeout(()=> c.remove(),1700); }
     }
 
     function evaluateAnswer(fb){
-      const q = QUESTIONS[quizState.index];
-      const correct = (quizState.selected === q.correctIndex);
-      if (correct){
-        quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!';
-        playOne(['sfx-certa-resposta']); simpleConfetti(fb);
-      } else {
-        fb.className='feedback error'; fb.textContent='Resposta errada!';
-        playOne(['sfx-errou']);
-      }
-      setTimeout(()=>{
-        quizState.selected = null;
-        if (quizState.index < QUESTIONS.length-1){ quizState.index++; renderCurrentQuestion(); }
-        else { finishQuiz(); }
-      }, 2000);
+      const q=QUESTIONS[quizState.index]; const correct=(quizState.selected===q.correctIndex);
+      if(correct){ quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!'; playOne(['sfx-certa-resposta']); simpleConfetti(fb); }
+      else{ fb.className='feedback error'; fb.textContent='Resposta errada!'; playOne(['sfx-errou']); }
+      setTimeout(()=>{ quizState.selected=null;
+        if(quizState.index<QUESTIONS.length-1){ quizState.index++; renderCurrentQuestion(); } else { finishQuiz(); } },2000);
     }
 
-    function playOne(ids){ try{ ids.forEach(id => { const el=$(id); if (el){ el.currentTime=0; el.play().catch(()=>{}); } }); }catch(e){} }
+    function playOne(ids){ try{ ids.forEach(id=>{ const el=$(id); if(el){ el.currentTime=0; el.play().catch(()=>{});} }); }catch(e){} }
 
     function finishQuiz(){
-      const part = JSON.parse(sessionStorage.getItem('quiz_participant')||'null');
-      if (!part) { show('screen-register'); return; }
-      const store = loadAll();
-      if (store.submissions.some(s => s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){
-        show('screen-register'); return;
-      }
-      const item = { name: part.name, phone: part.phone, score: quizState.correct, total: QUESTIONS.length, timestamp: nowISO() };
+      const part=JSON.parse(sessionStorage.getItem('quiz_participant')||'null'); if(!part){ show('screen-register'); return; }
+      const store=loadAll();
+      if(store.submissions.some(s=>s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){ show('screen-register'); return; }
+      const item={name:part.name, phone:part.phone, score:quizState.correct, total:QUESTIONS.length, timestamp:nowISO()};
       store.submissions.push(item); saveAll(store);
-      $('resultText').textContent = `Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
+      $('resultText').textContent=`Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
       show('screen-result'); sessionStorage.removeItem('quiz_participant');
     }
 
-    /* ====== RANKING ====== */
+    /* RANKING */
     function renderRanking(){
-      const list = $('rankList'); const count = $('rankCount');
-      const data = [...loadAll().submissions];
+      const list=$('rankList'), count=$('rankCount'); const data=[...loadAll().submissions];
       data.sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
-      count.textContent = data.length ? `Total de participantes: ${data.length}` : 'Sem participantes.';
-      if (!data.length){ list.innerHTML = '<div class="muted">Sem envios ainda.</div>'; return; }
-      list.innerHTML = data.map((r,i)=>{
-        const pos = i+1; const phoneMasked = maskPhone(r.phone);
-        return `<div class="rank-item">
-          <div class="rank-pos">${pos}</div>
-          <div><div style="font-weight:900">${r.name}</div><div class="muted">${phoneMasked} · ${r.timestamp}</div></div>
-          <div class="score">${r.score}/${r.total}</div>
-        </div>`;
-      }).join('');
+      count.textContent=data.length?`Total de participantes: ${data.length}`:'Sem participantes.';
+      if(!data.length){ list.innerHTML='<div class="muted">Sem envios ainda.</div>'; return; }
+      list.innerHTML=data.map((r,i)=>`<div class="rank-item">
+        <div class="rank-pos">${i+1}</div>
+        <div><div style="font-weight:900">${r.name}</div><div class="muted">${maskPhone(r.phone)} · ${r.timestamp}</div></div>
+        <div class="score">${r.score}/${r.total}</div>
+      </div>`).join('');
     }
-    function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p; return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
+    function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p;
+      return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
 
-    // Pós-resultado / voltar
-    $('btnVerRanking').addEventListener('click', ()=>{ renderRanking(); show('screen-ranking'); });
-    $('btnVoltarInicio').addEventListener('click', ()=> location.reload());
-    $('btnVoltarHome').addEventListener('click', ()=> location.reload());
+    $('btnVerRanking').addEventListener('click',()=>{ renderRanking(); show('screen-ranking'); });
+    $('btnVoltarInicio').addEventListener('click',()=> location.reload());
+    $('btnVoltarHome').addEventListener('click',()=> location.reload());
   </script>
 </body>
 </html>
