@@ -33,9 +33,11 @@
       z-index:40; pointer-events:none;
       background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));
     }
-    .brand, .title{pointer-events:auto; display:flex; align-items:center; gap:12px;}
+    .brand, .right{pointer-events:auto; display:flex; align-items:center; gap:12px;}
     .brand img{height:22px; opacity:.95}
-    .title{gap:10px; font-weight:600; font-size:14px; opacity:.9}
+    /* LOGO do jogo no topo direito */
+    .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45));}
+    @media (max-width:768px){ .title-logo{height:22px;} }
 
     /* -------------------- HERO (PRIMEIRA TELA) -------------------- */
     #hero{
@@ -52,18 +54,17 @@
     }
     #heroImg{
       width:100%; height:100%;
-      object-fit:cover;               /* DESKTOP */
+      object-fit:cover; /* desktop */
       user-select:none; -webkit-user-drag:none;
       filter:none;
     }
-
-    /* ===== AJUSTE MOBILE: apenas SUBIR a imagem, sem mudar o tamanho ===== */
+    /* ===== MOBILE: só “sobe” a arte, sem mudar tamanho ===== */
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{
         object-fit:contain;
         aspect-ratio:auto;
-        object-position: center 70px; /* ajuste fino vertical */
+        object-position: center 70px;
       }
     }
 
@@ -116,6 +117,41 @@
       border:1px solid rgba(255,255,255,.08); background:#0a0f0f;
     }
     .confirm-title{font-weight:800; margin-bottom:10px;}
+
+    /* ------- FX de feedback (visual) ------- */
+    #fxOverlay{
+      position:fixed; inset:0; pointer-events:none; z-index:60;
+    }
+    /* Acertou: halo verde que pulsa */
+    .fx-ok::after{
+      content:""; position:absolute; inset:0; margin:auto;
+      width:min(55vmin,520px); height:min(55vmin,520px);
+      border-radius:50%;
+      background:radial-gradient(ellipse at center, rgba(31,221,172,.28), rgba(31,221,172,0) 60%);
+      animation:okPulse .95s ease-out forwards;
+    }
+    @keyframes okPulse{
+      0%{transform:scale(.7); opacity:.0}
+      25%{opacity:.9}
+      100%{transform:scale(1.15); opacity:0}
+    }
+    /* Errou: shake + vermelho leve */
+    .fx-wrong{
+      animation:shake .6s ease-in-out 0s 1;
+    }
+    .fx-wrong::after{
+      content:""; position:absolute; inset:0;
+      background:radial-gradient(ellipse at center, rgba(242,78,58,.18), rgba(242,78,58,0) 65%);
+      animation:fadeOut .8s ease forwards;
+    }
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-10px)}
+      40%{transform:translateX(10px)}
+      60%{transform:translateX(-6px)}
+      80%{transform:translateX(6px)}
+    }
+    @keyframes fadeOut{ from{opacity:.9} to{opacity:0} }
   </style>
 </head>
 <body>
@@ -125,7 +161,10 @@
     <div class="brand">
       <img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'">
     </div>
-    <div class="title">Show do Crentão</div>
+    <div class="right">
+      <!-- LOGO do Show do Crentão (topo direito) -->
+      <img id="crentaoLogo" class="title-logo" alt="Show do Crentão" />
+    </div>
   </header>
 
   <!-- PRIMEIRA TELA -->
@@ -199,11 +238,16 @@
 
   </main>
 
+  <!-- Overlay de efeitos -->
+  <div id="fxOverlay" aria-hidden="true"></div>
+
 <script>
 (function(){
   /* --------------- Helpers --------------- */
   const hero = document.getElementById('hero');
   const heroImg = document.getElementById('heroImg');
+  const crentaoLogo = document.getElementById('crentaoLogo');
+  const fxOverlay = document.getElementById('fxOverlay');
 
   const fxAbertura     = document.getElementById('fxAbertura');
   const fxCerteza      = document.getElementById('fxCerteza');
@@ -229,26 +273,51 @@
     });
   }
 
-  /* --------------- Landing: escolhe capa --------------- */
-  const candidatos = [
+  // FX visual: 'ok' ou 'wrong'
+  function showFx(type){
+    return new Promise(resolve=>{
+      const cls = type === 'ok' ? 'fx-ok' : 'fx-wrong';
+      fxOverlay.classList.add(cls);
+      const timeout = setTimeout(()=>{
+        fxOverlay.classList.remove(cls);
+        clearTimeout(timeout);
+        resolve();
+      }, type === 'ok' ? 950 : 800);
+    });
+  }
+
+  /* --------------- Logos/Capa (carregam com fallback) --------------- */
+  const logoCandidates = ['img/crentao-logo.png','img/show-crentao-logo.png','img/crentao.png'];
+  (async function carregaLogo(){
+    for (const src of logoCandidates){
+      const ok = await testaImagem(src);
+      if (ok){ crentaoLogo.src = src; return; }
+    }
+    // se nada deu certo, esconde
+    crentaoLogo.style.display = 'none';
+  })();
+
+  const capaCandidates = [
     'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
     'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
     'img/logosc.png'
   ];
-  function tenta(src){
+  (async function acharCapa(){
+    for (const src of capaCandidates){
+      const ok = await testaImagem(src);
+      if (ok){ heroImg.src = src; heroImg.classList.remove('hidden'); return; }
+    }
+    hero.style.background = '#000';
+  })();
+
+  function testaImagem(src){
     return new Promise(resolve=>{
       const i = new Image();
-      i.onload = ()=>resolve(src);
-      i.onerror = ()=>resolve(null);
+      i.onload = ()=>resolve(true);
+      i.onerror = ()=>resolve(false);
       i.src = src + '?v=' + Date.now();
     });
   }
-  (async function acharCapa(){
-    let achou = null;
-    for (const src of candidatos){ achou = await tenta(src); if (achou) break; }
-    if (achou){ heroImg.src = achou; heroImg.classList.remove('hidden'); }
-    else { hero.style.background = '#000'; }
-  })();
 
   /* --------------- Navegação simples --------------- */
   const secForm = document.getElementById('section-form');
@@ -398,14 +467,17 @@
     canPlay(qual);
   });
 
-  // CONFIRMAR → avalia, toca acerto/erro e só depois avança
+  // CONFIRMAR → avalia, toca acerto/erro e mostra FX visual; só depois avança
   btnConf.addEventListener('click', async ()=>{
     stopAllFx();
     const p = perguntas[idx];
     const ok = (escolha===p.certa);
 
-    if(ok){ await playAndWait(fxCerta); }
-    else  { await playAndWait(fxErrou); }
+    if(ok){
+      await Promise.all([ playAndWait(fxCerta), showFx('ok') ]);
+    }else{
+      await Promise.all([ playAndWait(fxErrou), showFx('wrong') ]);
+    }
 
     idx++; escolha=null;
 
