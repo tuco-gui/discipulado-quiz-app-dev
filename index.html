@@ -15,18 +15,19 @@
       /* distância dos botões à base na landing */
       --landing-pad-bottom: calc(12vh + env(safe-area-inset-bottom, 0px));
     }
+
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
     /* ====== FUNDO (só na landing) ====== */
-    body.landing-active{overflow:hidden} /* evita scroll acidental na primeira tela */
+    body.landing-active{overflow:hidden} /* evita scroll na primeira tela */
 
     body.landing-active::before{
       content:""; position:fixed; inset:0; z-index:-2;
       background:
-        /* Removi escurecimento forte — cores mais vivas */
-        linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.18)),
+        /* leve realce (sem escurecer demais) */
+        linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.12)),
         url("img/cover.png") center / cover no-repeat;
       will-change: transform;
       transform-origin: 50% 30%;
@@ -34,23 +35,29 @@
       transform: scale(1);
     }
 
-    /* TELEFONE EM MODO RETRATO:
-       - “diminui” a arte (mostra mais da cena)
-       - desce levemente o foco no eixo Y
-       - sobe os botões (mais longe da barra do navegador) */
+    /* ----- MOBILE: reduzir a arte para caber inteira ----- */
+    /* telefones em retrato “comuns” */
     @media (max-aspect-ratio: 3/4){
       :root{ --landing-pad-bottom: calc(18vh + env(safe-area-inset-bottom, 0px)); }
       body.landing-active::before{
         background-position: center 42%;
-        transform: scale(.86);        /* << reduzir o tamanho percebido do logo */
+        transform: scale(.80);       /* << redução principal */
       }
     }
-    /* telefones muito altos/estreitos (ex.: iPhone 13 mini/SE recente) */
-    @media (max-width: 420px) and (max-aspect-ratio: 9/16){
-      :root{ --landing-pad-bottom: calc(20vh + env(safe-area-inset-bottom, 0px)); }
+    /* telefones mais estreitos/altos (ex.: iPhones novos) */
+    @media (max-width: 480px) and (max-aspect-ratio: 10/16){
+      :root{ --landing-pad-bottom: calc(21vh + env(safe-area-inset-bottom, 0px)); }
       body.landing-active::before{
-        background-position: center 40%;
-        transform: scale(.82);        /* << reduz ainda mais */
+        background-position: center 44%;
+        transform: scale(.74);       /* << redução extra para garantir que o logo caiba 100% */
+      }
+    }
+    /* aparelhos muito compactos (extra seguro) */
+    @media (max-width: 380px) and (max-aspect-ratio: 10/19){
+      :root{ --landing-pad-bottom: calc(23vh + env(safe-area-inset-bottom, 0px)); }
+      body.landing-active::before{
+        background-position: center 46%;
+        transform: scale(.70);       /* << cabe inteiro sem estourar */
       }
     }
 
@@ -58,8 +65,8 @@
     .landing{
       position:fixed; inset:0; z-index:3;
       min-height: 100svh; /* iOS/Android novos */
-      min-height: 100dvh; /* fallback novo */
-      min-height: 100vh;  /* fallback geral   */
+      min-height: 100dvh; /* novos padrões */
+      min-height: 100vh;  /* fallback */
       display:flex; align-items:flex-end; justify-content:center;
       padding: 0 16px var(--landing-pad-bottom);
       transition:opacity .45s ease, transform .45s ease;
@@ -197,12 +204,12 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v10-landing-mobile-tuned'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v11-landing-mobile-scale'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
     const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-    function loadAll(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):{submissions:[]}; }catch(e){ return {submissions:[]};}}
+    function loadAll(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):{submissions:[]}; }catch(e){ return {submissions:[]};}
     function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
     function show(id){ ['screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
 
