@@ -43,7 +43,14 @@
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
     }
-    #hero .cta{ position:relative; z-index:2; width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+
+    /* ✅ Fixa os botões no rodapé do hero */
+    #hero .cta{
+      position:absolute; left:50%; transform:translateX(-50%);
+      bottom: calc(12svh + env(safe-area-inset-bottom));
+      width:100%; max-width: min(780px, 92vw);
+      display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;
+    }
 
     .btn{
       appearance:none; border:0; border-radius:18px; padding:18px 28px;
@@ -237,22 +244,21 @@
   function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
 
   function goHome(){
-    // volta para a capa com CTA no lugar certo
     hideAll();
     stopAllFx();
     toggleLogo(false);
+    window.scrollTo(0,0);                    // ✅ garante topo da página
     hero.style.display='block';
+    hero.style.transition='';                // ✅ limpa transição anterior
     hero.style.opacity='1';
     hero.style.transform='none';
-    // >>> garante que a CTA apareça embaixo (topo da página)
-    window.scrollTo(0, 0);
   }
 
-  /* ---------- logo do topo (usa exatamente img/logosc.png) ---------- */
+  /* ---------- logo do topo ---------- */
   (async function carregaLogo(){
     const path = 'img/logosc.png';
     const ok = await testaImagem(path);
-    if (ok) crentaoLogo.src = path;
+    if (ok) crentaoLogo.src = path;          // aparece só no quiz/ranking
   })();
 
   /* ---------- capa do hero ---------- */
@@ -285,7 +291,6 @@
     setTimeout(()=>{ hero.style.display='none'; hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking(); }, 360);
   });
 
-  // volta para a HOME/capa
   btnVoltar.addEventListener('click', goHome);
 
   /* ---------- storage + form ---------- */
@@ -365,6 +370,7 @@
     elOps.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{ escolha=+r.value; }));
   }
 
+  // rodízio de áudios
   const confirmAudios = [fxCerteza, fxEstaCerto, fxQualResposta];
 
   btnResp.addEventListener('click', ()=>{
