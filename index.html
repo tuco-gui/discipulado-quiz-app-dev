@@ -16,15 +16,16 @@
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
-    /* FUNDO = sua arte (coloque o arquivo em img/cover.png) */
-    body::before{
+    /* FUNDO = aparece SOMENTE na landing */
+    body.landing-active::before{
       content:""; position:fixed; inset:0; z-index:-2;
+      /* bem mais leve – cores vivas! */
       background:
-        linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.90)),
+        linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.35)),
         url("img/cover.png") center/cover no-repeat;
     }
 
-    /* ====== LANDING: apenas os dois botões, sobre a imagem ====== */
+    /* ====== LANDING: apenas os 2 botões, sobre a imagem ====== */
     .landing{
       position:fixed; inset:0; z-index:3;
       display:flex; align-items:flex-end; justify-content:center;
@@ -59,7 +60,7 @@
     }
     .app-started header.appbar{ display:flex; }
     .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.12))}
-    .brand-right{font-weight:900;letter-spacing:.02em}
+    .brand-right img{height:44px;object-fit:contain}
 
     main{max-width:1100px;margin:12px auto 64px;padding:18px 16px}
     .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
@@ -88,11 +89,11 @@
     .score{font-weight:900}
   </style>
 </head>
-<body>
+<body class="landing-active">
   <!-- APPBAR (aparece após clicar Iniciar/Ranking) -->
   <header class="appbar">
     <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
-    <div class="brand-right">Show do Crentão</div>
+    <div class="brand-right"><img src="img/logosc.png" alt="Show do Crentão" /></div>
   </header>
 
   <!-- LANDING: apenas os dois botões -->
@@ -152,7 +153,7 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v7.1-landing-fixa'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v8-landing-viva-logo-right'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -166,11 +167,12 @@
     const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
     const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
 
-    /* Entrar no app: some a landing do fluxo e sobe página pro topo */
+    /* Entrar no app: some landing e remove o fundo da primeira tela */
     function enterApp(next){
       const landing=$('landing');
       landing.classList.add('hide');
-      document.body.classList.add('app-started'); // appbar
+      document.body.classList.remove('landing-active');   // tira a imagem de fundo
+      document.body.classList.add('app-started');         // mostra a appbar
       setTimeout(()=>{ landing.style.display='none'; window.scrollTo({top:0, behavior:'instant'}); next(); }, 460);
     }
 
