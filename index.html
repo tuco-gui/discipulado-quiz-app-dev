@@ -6,11 +6,11 @@
   <title>Show do Crentão — Sobrenatural Church</title>
   <meta name="color-scheme" content="dark">
   <style>
-    :root{ --bg:#000; --text:#fff; --muted:#cbd5e1; --accent:#ffffff; --ok:#22c55e; --error:#ef4444; --border:#1f2937; }
+    :root{ --bg:#000; --text:#fff; --muted:#cbd5e1; --ok:#22c55e; --error:#ef4444; }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;line-height:1.45}
     header{padding:22px 16px 8px;text-align:center;border-bottom:1px solid #0b0b0b;background:linear-gradient(180deg,#070707,#000)}
-    .brand{display:inline-flex;gap:12px;align-items:center;justify-content:center}
+    .brand{display:inline-flex;gap:14px;align-items:center;justify-content:center}
     .logo-full{height:44px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.15));}
     h1{margin:4px 0 0;font-size:clamp(1.2rem,1rem + 1.4vw,2rem);letter-spacing:.02em}
     .sub{color:var(--muted);font-size:.95rem}
@@ -47,7 +47,7 @@
 <body>
   <header>
     <div class="brand">
-      <img src="assets/img/logo.png" alt="Sobrenatural Church" class="logo-full" />
+      <img src="img/logo.png" alt="Sobrenatural Church" class="logo-full" />
       <div>
         <h1>Show do Crentão</h1>
         <div class="sub">Discipulado Nível 2 — Aula 1</div>
@@ -56,10 +56,249 @@
   </header>
 
   <main>
-    <!-- Home -->
+    <!-- Tela inicial -->
     <section id="screen-home" class="card grid">
       <h2 class="center">Bem-vindo!</h2>
       <p class="muted center">Escolha uma opção abaixo.</p>
+      <div class="grid-2">
+        <button id="goParticipar" class="btn row">Participar do Quiz</button>
+        <button id="goRanking" class="btn ghost row">Ver Ranking</button>
+      </div>
+    </section>
+
+    <!-- Dados do participante -->
+    <section id="screen-register" class="card grid hidden">
+      <h2>Dados do participante</h2>
+      <div>
+        <label for="nome">Nome completo</label>
+        <input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name">
+      </div>
+      <div>
+        <label for="fone">Telefone (com DDD)</label>
+        <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel">
+      </div>
+      <div class="notice muted">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
+      <div><button id="btnSendRegister" class="btn">Enviar</button></div>
+      <div id="msgRegister" class="notice hidden"></div>
+    </section>
+
+    <!-- Quiz: uma pergunta por vez -->
+    <section id="screen-quiz" class="card grid hidden">
+      <div class="grid" id="quizStep"></div>
+      <div id="quizMsg" class="notice hidden"></div>
+    </section>
+
+    <!-- Resultado -->
+    <section id="screen-result" class="card grid hidden center">
+      <h2>Resultado</h2>
+      <p id="resultText" class="muted"></p>
+      <div class="grid-2">
+        <button id="btnVerRanking" class="btn row">Ver Ranking</button>
+        <button id="btnVoltarInicio" class="btn ghost row">Início</button>
+      </div>
+    </section>
+
+    <!-- Ranking -->
+    <section id="screen-ranking" class="card grid hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+        <h2 style="margin:0;">Ranking</h2>
+        <button id="btnVoltarHome" class="btn ghost">Voltar</button>
+      </div>
+      <div id="rankCount" class="muted"></div>
+      <div id="rankList" class="rank-list"></div>
+    </section>
+  </main>
+
+  <!-- Áudios (usando /audio conforme seu repositório) -->
+  <audio id="sfx-intro" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto"></audio>
+  <audio id="sfx-pergunta" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
+  <audio id="sfx-certeza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
+  <audio id="sfx-esta-certo" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
+  <audio id="sfx-qual-resposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
+  <audio id="sfx-certa-resposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
+  <audio id="sfx-errou" src="audio/faustao-errou.mp3" preload="auto"></audio>
+
+  <script>
+    /* ================== CONFIG ================== */
+    const QUIZ_VERSION = 'v4';
+    const STORAGE_KEY = 'discipulado_quiz_' + QUIZ_VERSION;
+    const $ = id => document.getElementById(id);
+    const normPhone = s => (s||'').replace(/\D+/g,'');
+    const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
+    const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+    function loadAll(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : { submissions: [] }; } catch(e){ return { submissions: [] }; } }
+    function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+    function show(id){ ['screen-home','screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
+
+    /* ================== PERGUNTAS ================== */
+    const QUESTIONS = [
+      { title: "O que caracteriza a obediência imediata?",
+        options: ["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],
+        correctIndex: 1 },
+      { title: "O que é fé genuína segundo o estudo?",
+        options: ["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
+        correctIndex: 2 },
+      { title: "Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
+        options: ["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],
+        correctIndex: 1 },
+      { title: "Qual é a importância de testemunhar as obras de Deus?",
+        options: ["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],
+        correctIndex: 1 }
+    ];
+
+    /* ================== INÍCIO ================== */
+    // Em alguns navegadores o áudio só toca após uma interação do usuário.
+    // Por isso, deixo a intro preparada, mas ela só vai tocar depois do primeiro clique.
+    document.addEventListener('click', function once(){ 
+      try { $('sfx-intro').currentTime = 0; $('sfx-intro').play().catch(()=>{}); } catch(e) {}
+      document.removeEventListener('click', once);
+    });
+
+    $('goParticipar').addEventListener('click', ()=> show('screen-register'));
+    $('goRanking').addEventListener('click', ()=> { renderRanking(); show('screen-ranking'); });
+
+    function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
+    function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
+
+    $('btnSendRegister').addEventListener('click', () => {
+      const name = titleCase(($('nome').value||''));
+      const phoneRaw = normPhone(($('fone').value||''));
+      const box = $('msgRegister'); clearMsg(box);
+      if (!name || name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
+      if (!phoneRaw || phoneRaw.length<10) return setMsg(box,'Informe um telefone válido com DDD.','warn');
+      const all = loadAll();
+      if (all.submissions.some(s => s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw)){
+        return setMsg(box, 'Você já respondeu este quiz e não pode responder novamente.', 'error');
+      }
+      sessionStorage.setItem('quiz_participant', JSON.stringify({ name, phone: phoneRaw, startedAt: nowISO() }));
+      quizState.index = 0; quizState.correct = 0; quizState.selected = null;
+      renderCurrentQuestion();
+      show('screen-quiz');
+    });
+
+    /* ================== QUIZ ================== */
+    const quizState = { index: 0, correct: 0, selected: null };
+
+    function renderCurrentQuestion(){
+      const step = $('quizStep'); step.innerHTML='';
+      const q = QUESTIONS[quizState.index];
+      const wrap = document.createElement('div'); wrap.className='grid';
+      const title = document.createElement('div'); title.className='q-title'; title.textContent = `Pergunta ${quizState.index+1} de ${QUESTIONS.length}: ` + q.title;
+      const qs = document.createElement('div'); qs.className='q';
+      q.options.forEach((opt, oi)=>{
+        const lbl = document.createElement('label'); lbl.className='opt';
+        const inp = document.createElement('input'); inp.type='radio'; inp.name='alt'; inp.value=oi;
+        inp.addEventListener('change', ()=> quizState.selected = oi);
+        const span = document.createElement('span'); span.textContent = opt;
+        lbl.appendChild(inp); lbl.appendChild(span); qs.appendChild(lbl);
+      });
+      const row = document.createElement('div'); row.className='grid-2';
+      const btnEnviar = document.createElement('button'); btnEnviar.className='btn'; btnEnviar.textContent='Enviar';
+      const btnLimpar = document.createElement('button'); btnLimpar.className='btn ghost'; btnLimpar.textContent='Limpar';
+      row.appendChild(btnEnviar); row.appendChild(btnLimpar);
+
+      const fb = document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
+
+      wrap.appendChild(title); wrap.appendChild(qs); wrap.appendChild(row); wrap.appendChild(fb);
+      step.appendChild(wrap);
+
+      btnLimpar.addEventListener('click', ()=>{
+        quizState.selected = null; qs.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false);
+      });
+
+      btnEnviar.addEventListener('click', ()=>{
+        if (quizState.selected === null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return; }
+        askConfirmation(fb, () => { evaluateAnswer(fb); });
+      });
+
+      // prompt da pergunta
+      playOne(['sfx-pergunta']);
+    }
+
+    function askConfirmation(container, onConfirm){
+      // toca "Você tem certeza?" ou "Está certo disso?"
+      playOne(Math.random() < 0.5 ? ['sfx-certeza'] : ['sfx-esta-certo']);
+      container.className='feedback fx'; container.innerHTML='';
+      const p = document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
+      const row = document.createElement('div'); row.className='grid-2';
+      const btnConf = document.createElement('button'); btnConf.className='btn'; btnConf.textContent='Confirmar';
+      const btnCanc = document.createElement('button'); btnCanc.className='btn ghost'; btnCanc.textContent='Cancelar';
+      row.appendChild(btnConf); row.appendChild(btnCanc);
+      container.appendChild(p); container.appendChild(row);
+      container.classList.remove('hidden');
+      btnConf.addEventListener('click', onConfirm);
+      btnCanc.addEventListener('click', ()=> { container.classList.add('hidden'); container.innerHTML=''; });
+    }
+
+    function simpleConfetti(container){
+      for(let i=0;i<22;i++){
+        const c = document.createElement('div'); c.className='confetti'; c.style.left='50%'; c.style.setProperty('--x', (Math.random()*200-100).toFixed(0));
+        c.style.background = `hsl(${Math.floor(Math.random()*360)},100%,70%)`;
+        c.style.animationDuration = (1+Math.random()*0.8).toFixed(2)+'s';
+        container.appendChild(c); setTimeout(()=> c.remove(), 1700);
+      }
+    }
+
+    function evaluateAnswer(fb){
+      const q = QUESTIONS[quizState.index];
+      const correct = (quizState.selected === q.correctIndex);
+      if (correct){
+        quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!';
+        playOne(['sfx-certa-resposta']); simpleConfetti(fb);
+      } else {
+        fb.className='feedback error'; fb.textContent='Resposta errada!';
+        playOne(['sfx-errou']);
+      }
+      setTimeout(()=>{
+        quizState.selected = null;
+        if (quizState.index < QUESTIONS.length-1){
+          quizState.index++; renderCurrentQuestion();
+        } else { finishQuiz(); }
+      }, 2000);
+    }
+
+    function playOne(ids){ try{ ids.forEach(id => { const el=$(id); if (el){ el.currentTime=0; el.play().catch(()=>{}); } }); }catch(e){} }
+
+    function finishQuiz(){
+      const part = JSON.parse(sessionStorage.getItem('quiz_participant')||'null');
+      if (!part) { show('screen-home'); return; }
+      const store = loadAll();
+      if (store.submissions.some(s => s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){
+        show('screen-home'); return;
+      }
+      const item = { name: part.name, phone: part.phone, score: quizState.correct, total: QUESTIONS.length, timestamp: nowISO() };
+      store.submissions.push(item); saveAll(store);
+      $('resultText').textContent = `Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
+      show('screen-result'); sessionStorage.removeItem('quiz_participant');
+    }
+
+    /* ================== RANKING ================== */
+    function renderRanking(){
+      const list = $('rankList'); const count = $('rankCount');
+      const data = [...loadAll().submissions];
+      data.sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
+      count.textContent = data.length ? `Total de participantes: ${data.length}` : 'Sem participantes.';
+      if (!data.length){ list.innerHTML = '<div class="muted">Sem envios ainda.</div>'; return; }
+      list.innerHTML = data.map((r,i)=>{
+        const pos = i+1; const phoneMasked = maskPhone(r.phone);
+        return `<div class="rank-item">
+          <div class="rank-pos">${pos}</div>
+          <div><div style="font-weight:900">${r.name}</div><div class="muted">${phoneMasked} · ${r.timestamp}</div></div>
+          <div class="score">${r.score}/${r.total}</div>
+        </div>`;
+      }).join('');
+    }
+    function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p; return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
+
+    $('btnVerRanking').addEventListener('click', ()=>{ renderRanking(); show('screen-ranking'); });
+    $('btnVoltarInicio').addEventListener('click', ()=> show('screen-home'));
+    $('btnVoltarHome').addEventListener('click', ()=> show('screen-home'));
+
+    // Garante que a tela inicial é a primeira visível
+    show('screen-home');
+  </script>
+</body>
+</html>
       <div class="grid-2">
         <button id="goParticipar" class="btn row">Participar do Quiz</button>
         <button id="goRanking" class="btn ghost row">Ver Ranking</button>
