@@ -16,30 +16,26 @@
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
-    /* FUNDO = sua arte */
+    /* FUNDO = sua arte (coloque o arquivo em img/cover.png) */
     body::before{
       content:""; position:fixed; inset:0; z-index:-2;
       background:
-        linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.9)),
+        linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.90)),
         url("img/cover.png") center/cover no-repeat;
     }
 
-    /* ====== LANDING: só os dois botões sobre a imagem ====== */
+    /* ====== LANDING: apenas os dois botões, sobre a imagem ====== */
     .landing{
-      min-height:100svh;             /* ocupa a tela inteira */
+      position:fixed; inset:0; z-index:3;
       display:flex; align-items:flex-end; justify-content:center;
-      padding:0 16px 8vh;            /* joga os botões mais perto da parte de baixo */
+      padding:0 16px 8vh;
       transition:opacity .45s ease, transform .45s ease;
     }
     .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
 
-    .cta{
-      width:min(920px,100%);
-      display:grid; gap:18px; grid-template-columns:1fr 1fr;
-    }
-    @media (max-width:720px){
-      .cta{ grid-template-columns:1fr; }
-    }
+    .cta{ width:min(920px,100%); display:grid; gap:18px; grid-template-columns:1fr 1fr; }
+    @media (max-width:720px){ .cta{ grid-template-columns:1fr; } }
+
     .btn{
       appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
       font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
@@ -55,9 +51,9 @@
     .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
     .btn.rank:active{transform:translateY(1px)}
 
-    /* ====== APP / telas internas ====== */
+    /* ====== APP ====== */
     header.appbar{
-      position:sticky; top:0; z-index:5; padding:10px 16px;
+      position:sticky; top:0; z-index:2; padding:10px 16px;
       border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
       display:none; align-items:center; justify-content:space-between; gap:12px;
     }
@@ -65,7 +61,7 @@
     .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.12))}
     .brand-right{font-weight:900;letter-spacing:.02em}
 
-    main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
+    main{max-width:1100px;margin:12px auto 64px;padding:18px 16px}
     .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
@@ -93,13 +89,13 @@
   </style>
 </head>
 <body>
-  <!-- APPBAR (só depois que clicar) -->
+  <!-- APPBAR (aparece após clicar Iniciar/Ranking) -->
   <header class="appbar">
     <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
     <div class="brand-right">Show do Crentão</div>
   </header>
 
-  <!-- LANDING: APENAS OS DOIS BOTÕES -->
+  <!-- LANDING: apenas os dois botões -->
   <section id="landing" class="landing">
     <div class="cta">
       <button id="goParticipar" class="btn start">Iniciar</button>
@@ -156,7 +152,7 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v7-landing-simples'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v7.1-landing-fixa'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -170,11 +166,12 @@
     const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
     const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
 
-    /* Entradas da landing */
+    /* Entrar no app: some a landing do fluxo e sobe página pro topo */
     function enterApp(next){
-      $('landing').classList.add('hide');
-      document.body.classList.add('app-started'); // mostra appbar
-      setTimeout(next, 420);
+      const landing=$('landing');
+      landing.classList.add('hide');
+      document.body.classList.add('app-started'); // appbar
+      setTimeout(()=>{ landing.style.display='none'; window.scrollTo({top:0, behavior:'instant'}); next(); }, 460);
     }
 
     $('goParticipar').addEventListener('click', ()=>{ startIntro(); enterApp(()=> show('screen-register'));});
@@ -194,7 +191,7 @@
       stopIntro(); // para música ao enviar
       sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
       quizState.index=0; quizState.correct=0; quizState.selected=null;
-      renderCurrentQuestion(); show('screen-quiz');
+      renderCurrentQuestion(); show('screen-quiz'); window.scrollTo({top:0, behavior:'instant'});
     });
 
     /* QUIZ */
@@ -229,7 +226,7 @@
       btnLimpar.addEventListener('click',()=>{ quizState.selected=null; qsBox.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false); });
       btnEnviar.addEventListener('click',()=>{ if(quizState.selected===null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return;}
         askConfirmation(fb, ()=> evaluateAnswer(fb)); });
-      playOne(['sfx-pergunta']);
+      playOne(['sfx-pergunta']); window.scrollTo({top:0, behavior:'instant'});
     }
 
     function askConfirmation(container,onConfirm){
@@ -263,7 +260,7 @@
       const item={name:part.name, phone:part.phone, score:quizState.correct, total:QUESTIONS.length, timestamp:nowISO()};
       store.submissions.push(item); saveAll(store);
       document.getElementById('resultText').textContent=`Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
-      show('screen-result'); sessionStorage.removeItem('quiz_participant');
+      show('screen-result'); sessionStorage.removeItem('quiz_participant'); window.scrollTo({top:0, behavior:'instant'});
     }
 
     /* RANKING */
@@ -278,15 +275,14 @@
         <div><div style="font-weight:900">${r.name}</div><div class="muted">${maskPhone(r.phone)} · ${r.timestamp}</div></div>
         <div class="score">${r.score}/${r.total}</div>
       </div>`).join('');
+      window.scrollTo({top:0, behavior:'instant'});
     }
     function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p;
       return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
 
-    // Pós-resultado / voltar
     document.getElementById('btnVerRanking').addEventListener('click',()=>{ renderRanking(); show('screen-ranking'); });
     document.getElementById('btnVoltarInicio').addEventListener('click',()=> location.reload());
     document.getElementById('btnVoltarHome').addEventListener('click',()=> location.reload());
   </script>
 </body>
 </html>
-
