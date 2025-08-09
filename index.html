@@ -11,10 +11,19 @@
       --bg:#000;
       --text:#fff;
       --muted:#cbd5e1;
-      --green:#18e7a9;         /* verde neon do palco */
-      --green-deep:#0bb37f;    /* verde mais escuro */
-      --btn-dark:#0b0f12;      /* fundo do botão secundário */
-      --border:#0e1716;
+
+      /* Paleta baseada na sua arte */
+      --green:#1bd39b;         /* botão iniciar */
+      --green-deep:#12b37f;
+      --ring:#29f0b6;
+
+      --white:#ffffff;         /* botão ranking */
+      --ink:#0b0f12;
+
+      --panel:#050a0a;
+      --panel-2:#071313;
+      --border:#0c1f1d;
+
       --ok:#22c55e;
       --error:#ef4444;
     }
@@ -31,67 +40,79 @@
     body::before{
       content:""; position:fixed; inset:0; z-index:-2;
       background:
-        linear-gradient(180deg,rgba(0,0,0,.70),rgba(0,0,0,.86)),
-        radial-gradient(1000px 500px at 50% 0%, rgba(24,231,169,.08), transparent 60%),
+        linear-gradient(180deg,rgba(0,0,0,.65),rgba(0,0,0,.86)),
+        radial-gradient(1000px 500px at 50% 0%, rgba(27,211,155,.08), transparent 60%),
         #000;
       background-size:cover;
     }
     body.has-cover::before{
       background:
-        linear-gradient(180deg,rgba(0,0,0,.65),rgba(0,0,0,.86)),
+        linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.9)),
         url("img/cover.png") center/cover no-repeat;
     }
 
-    main{max-width:1000px;margin:0 auto 64px;padding:18px 16px}
+    main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
 
     /* ======== HERO (PAINEL INICIAL) ======== */
     .hero{
-      margin:56px auto 24px; max-width:860px;
+      margin:48px auto 24px; max-width:980px;
       background:rgba(0,0,0,.72);
-      border:1px solid #101818; border-radius:22px;
-      box-shadow:0 18px 45px rgba(0,0,0,.65);
+      border:1px solid #0b1714; border-radius:20px;
+      box-shadow:0 18px 45px rgba(0,0,0,.55);
       padding:28px 28px 32px;
-      display:grid; gap:16px; justify-items:center; text-align:center;
-      position:relative; overflow:hidden;
+      display:grid; gap:18px; justify-items:center; text-align:center;
       transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s ease;
     }
     .hero h1{margin:0; font-size:clamp(1.6rem,1rem + 2.6vw,2.8rem)}
     .sub{color:var(--muted)}
-    .actions{display:grid; gap:14px; grid-template-columns:1fr 1fr; width:min(560px,100%)}
+
+    /* BOTÕES – layout e responsividade */
+    .actions{
+      display:grid; gap:18px;
+      grid-template-columns:1fr 1fr;
+      width:min(820px,100%);
+    }
+    @media (max-width:720px){
+      .actions{ grid-template-columns:1fr; }
+    }
 
     .btn{
       appearance:none; border:0; cursor:pointer;
-      padding:14px 16px; border-radius:14px; font-weight:900; text-align:center;
-      transition:transform .06s ease, box-shadow .2s ease, background .2s;
+      padding:18px 20px; border-radius:12px;
+      font-weight:1000; letter-spacing:.02em;
+      text-align:center; text-transform:uppercase;
+      font-size:clamp(1rem,.6rem + 1.4vw,1.6rem);
+      transition:transform .06s ease, box-shadow .2s ease, background .2s, filter .2s;
     }
-    /* Primário – chama atenção (Participar) */
-    .btn.primary{
+
+    /* INICIAR (verde) */
+    .btn.start{
       color:#02110c;
       background:linear-gradient(180deg,var(--green),var(--green-deep));
-      box-shadow:0 6px 16px rgba(24,231,169,.25), inset 0 1px 0 rgba(255,255,255,.35);
-      border:1px solid #0bd8a0;
+      box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
+      border:1px solid #10d49f;
     }
-    .btn.primary:hover{ filter:saturate(1.15) brightness(1.02) }
-    .btn.primary:active{ transform:translateY(1px) }
+    .btn.start:hover{ filter:saturate(1.15) brightness(1.02) }
+    .btn.start:active{ transform:translateY(1px) }
 
-    /* Secundário – escuro com borda/hover verde (Ranking) */
-    .btn.secondary{
-      color:#e8fff8; background:var(--btn-dark);
-      border:1px solid #10201d;
-      box-shadow:inset 0 0 0 1px transparent;
+    /* RANKING (branco) */
+    .btn.rank{
+      color:var(--ink);
+      background:var(--white);
+      border:1px solid #dfe7e4;
+      box-shadow:0 6px 16px rgba(255,255,255,.08);
     }
-    .btn.secondary:hover{
-      border-color:#1ce8b5;
-      box-shadow:0 0 0 3px rgba(28,232,181,.15);
+    .btn.rank:hover{
+      box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45);
     }
-    .btn.secondary:active{ transform:translateY(1px) }
+    .btn.rank:active{ transform:translateY(1px) }
 
-    /* ======== OVERLAY DO LOGO CENTRAL (para animar ao canto) ======== */
+    /* ======== LOGO CENTRAL (sobe para o canto) ======== */
     .logo-overlay{
-      position:fixed; left:50%; top:44%;
+      position:fixed; left:50%; top:42%;
       transform:translate(-50%,-50%);
-      width:min(540px,80vw); height:auto; z-index:3;
-      pointer-events:none; opacity:.96;
+      width:min(640px,88vw);
+      z-index:3; pointer-events:none; opacity:.98;
       transition:
         left .6s cubic-bezier(.2,.8,.2,1),
         top .6s cubic-bezier(.2,.8,.2,1),
@@ -99,26 +120,24 @@
         width .6s cubic-bezier(.2,.8,.2,1),
         opacity .6s ease;
     }
-    /* posição alvo (canto superior direito) após animação */
     .app-started .logo-overlay{
-      left:auto; right:20px; top:14px;
-      transform:none; width:min(300px,38vw); opacity:.95;
+      left:auto; right:20px; top:16px;
+      transform:none; width:min(320px,38vw); opacity:.95;
     }
 
-    /* Se não houver imagem show-logo, uso um título estilizado */
+    /* Fallback em texto se não existir show-logo.png */
     .logo-fallback{
-      position:fixed; left:50%; top:44%;
+      position:fixed; left:50%; top:42%;
       transform:translate(-50%,-50%);
-      z-index:3; pointer-events:none; opacity:.96;
-      font-weight:900;
-      font-size:clamp(1.8rem,1rem + 4vw,3.2rem);
-      letter-spacing:.02em; text-shadow:0 6px 18px rgba(0,0,0,.65);
+      z-index:3; pointer-events:none; opacity:.98;
+      font-weight:1000; text-align:center;
+      font-size:clamp(1.8rem,1rem + 4vw,3.4rem);
+      text-shadow:0 6px 18px rgba(0,0,0,.65);
       transition:left .6s, top .6s, transform .6s, opacity .6s, font-size .6s;
     }
-    .logo-fallback .big{display:block}
     .logo-fallback .tag{
-      display:inline-block; margin-top:4px; padding:6px 10px;
-      background:#1e8d64; border:1px solid #0bd8a0; border-radius:10px;
+      display:inline-block; margin-top:8px; padding:8px 14px;
+      background:#1e8d64; border:1px solid #10d49f; border-radius:12px;
       transform:skewX(-8deg);
     }
     .app-started .logo-fallback{
@@ -126,7 +145,7 @@
       font-size:clamp(1.2rem,.6rem + 2.5vw,2rem);
     }
 
-    /* ======== APPBAR (logo Sobrenatural à esquerda) ======== */
+    /* ======== APPBAR (logo igreja à esquerda) ======== */
     header.appbar{
       position:sticky; top:0; z-index:5;
       padding:10px 16px; border-bottom:1px solid #0b1b19;
@@ -135,12 +154,11 @@
     }
     .app-started header.appbar{ display:flex; }
     .brand-left{display:flex; align-items:center; gap:10px}
-    .brand-left img{height:36px; object-fit:contain; filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
-    .brand-right{font-weight:900; letter-spacing:.02em; color:#dffff6}
-    main{max-width:980px;margin:0 auto 64px;padding:18px 16px}
+    .brand-left img{height:38px; object-fit:contain; filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
+    .brand-right{font-weight:900; letter-spacing:.02em; color:#eafff7}
 
     /* ======== TELAS ======== */
-    .card{border:1px solid var(--border);border-radius:16px;background:#050a0a;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
+    .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
     @media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr}}
@@ -148,7 +166,7 @@
     label{font-weight:800;display:block;margin:8px 0 6px}
     input[type="text"],input[type="tel"]{width:100%;background:#061010;color:#fff;border:1px solid #0c1f1d;border-radius:12px;padding:12px 14px;outline:none}
     input[type="text"]:focus,input[type="tel"]:focus{border-color:#164a42}
-    .q{padding:14px;border:1px solid #0c1f1d;border-radius:12px;background:#071313}
+    .q{padding:14px;border:1px solid #0c1f1d;border-radius:12px;background:var(--panel-2)}
     .q-title{font-weight:900;margin-bottom:10px}
     .opt{display:grid;grid-template-columns:auto 1fr;gap:8px;margin:8px 0;align-items:start}
     .notice{padding:10px;border:1px solid #0c1f1d;border-radius:12px;background:#071313;margin-top:10px}
@@ -172,13 +190,14 @@
 </head>
 <body class="has-cover">
   <!-- LOGO CENTRAL QUE SOBE PARA O CANTO DIREITO -->
-  <img id="showLogoImg" class="logo-overlay" src="img/show-logo.png" alt="Show do Crentão" onerror="this.style.display='none';document.getElementById('showLogoFallback').style.display='block'">
+  <img id="showLogoImg" class="logo-overlay" src="img/show-logo.png" alt="Show do Crentão"
+       onerror="this.style.display='none';document.getElementById('showLogoFallback').style.display='block'">
   <div id="showLogoFallback" class="logo-fallback" style="display:none">
-    <span class="big">SHOW DO</span>
-    <span class="big tag">CRENTÃO</span>
+    <div>SHOW DO</div>
+    <div class="tag">CRENTÃO</div>
   </div>
 
-  <!-- APPBAR (fica visível após animação) -->
+  <!-- APPBAR (aparece depois da animação) -->
   <header class="appbar">
     <div class="brand-left">
       <img src="img/logo.png" alt="Sobrenatural Church" />
@@ -192,8 +211,8 @@
       <h1>Show do Crentão</h1>
       <div class="sub">Bem-vindo! Escolha uma opção abaixo.</div>
       <div class="actions">
-        <button id="goParticipar" class="btn primary">Participar do Quiz</button>
-        <button id="goRanking" class="btn secondary">Ver Ranking</button>
+        <button id="goParticipar" class="btn start">Iniciar</button>
+        <button id="goRanking" class="btn rank">Ranking</button>
       </div>
     </section>
 
@@ -209,7 +228,7 @@
         <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel">
       </div>
       <div class="notice muted">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
-      <div><button id="btnSendRegister" class="btn primary">Enviar</button></div>
+      <div><button id="btnSendRegister" class="btn start">Enviar</button></div>
       <div id="msgRegister" class="notice hidden"></div>
     </section>
 
@@ -224,8 +243,8 @@
       <h2>Resultado</h2>
       <p id="resultText" class="muted"></p>
       <div class="grid-2">
-        <button id="btnVerRanking" class="btn secondary">Ver Ranking</button>
-        <button id="btnVoltarInicio" class="btn secondary">Início</button>
+        <button id="btnVerRanking" class="btn rank">Ver Ranking</button>
+        <button id="btnVoltarInicio" class="btn rank">Início</button>
       </div>
     </section>
 
@@ -233,7 +252,7 @@
     <section id="screen-ranking" class="card grid hidden">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
         <h2 style="margin:0;">Ranking</h2>
-        <button id="btnVoltarHome" class="btn secondary">Voltar</button>
+        <button id="btnVoltarHome" class="btn rank">Voltar</button>
       </div>
       <div id="rankCount" class="muted"></div>
       <div id="rankList" class="rank-list"></div>
@@ -251,7 +270,7 @@
 
   <script>
     /* ====== UTIL ====== */
-    const QUIZ_VERSION = 'v5-hero-move';
+    const QUIZ_VERSION = 'v6-iniciar-ranking';
     const STORAGE_KEY = 'discipulado_quiz_' + QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
@@ -278,13 +297,13 @@
     function startAppFlow(next){
       const hero = $('hero');
       hero.classList.add('hide-out');
-      document.body.classList.add('app-started'); // ativa appbar e move o logo overlay
-      setTimeout(next, 580); // acompanha .6s do CSS
+      document.body.classList.add('app-started'); // move o logo e mostra o appbar
+      setTimeout(next, 580);
     }
 
     /* ====== NAVEGAÇÃO ====== */
     $('goParticipar').addEventListener('click', ()=>{
-      startIntro();             // toca ao clicar Participar
+      startIntro();             // música ao clicar INICIAR
       startAppFlow(()=> { show('screen-register'); });
     });
     $('goRanking').addEventListener('click', ()=>{
@@ -308,9 +327,7 @@
         return setMsg(box, 'Você já respondeu este quiz e não pode responder novamente.', 'error');
       }
 
-      // PARA a música quando envia cadastro
-      stopIntro();
-
+      stopIntro(); // para a música ao enviar
       sessionStorage.setItem('quiz_participant', JSON.stringify({ name, phone: phoneRaw, startedAt: nowISO() }));
       quizState.index = 0; quizState.correct = 0; quizState.selected = null;
       renderCurrentQuestion();
@@ -350,8 +367,8 @@
         lbl.appendChild(inp); lbl.appendChild(span); qsBox.appendChild(lbl);
       });
       const row = document.createElement('div'); row.className='grid-2';
-      const btnEnviar = document.createElement('button'); btnEnviar.className='btn primary'; btnEnviar.textContent='Enviar';
-      const btnLimpar = document.createElement('button'); btnLimpar.className='btn secondary'; btnLimpar.textContent='Limpar';
+      const btnEnviar = document.createElement('button'); btnEnviar.className='btn start'; btnEnviar.textContent='Enviar';
+      const btnLimpar = document.createElement('button'); btnLimpar.className='btn rank'; btnLimpar.textContent='Limpar';
       row.appendChild(btnEnviar); row.appendChild(btnLimpar);
 
       const fb = document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
@@ -376,8 +393,8 @@
       container.className='feedback fx'; container.innerHTML='';
       const p = document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
       const row = document.createElement('div'); row.className='grid-2';
-      const btnConf = document.createElement('button'); btnConf.className='btn primary'; btnConf.textContent='Confirmar';
-      const btnCanc = document.createElement('button'); btnCanc.className='btn secondary'; btnCanc.textContent='Cancelar';
+      const btnConf = document.createElement('button'); btnConf.className='btn start'; btnConf.textContent='Confirmar';
+      const btnCanc = document.createElement('button'); btnCanc.className='btn rank'; btnCanc.textContent='Cancelar';
       row.appendChild(btnConf); row.appendChild(btnCanc);
       container.appendChild(p); container.appendChild(row);
       container.classList.remove('hidden');
