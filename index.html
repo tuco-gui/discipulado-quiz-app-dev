@@ -49,19 +49,35 @@
     #hero .bg{
       position:absolute; inset:0; z-index:0;
       display:grid; place-items:center;
+      overflow:hidden;
     }
     #heroImg{
       width:100%; height:100%;
       object-fit:cover;               /* desktop */
+      object-position:center center;
       user-select:none; -webkit-user-drag:none;
       filter:none;                    /* sem escurecer */
+      transform:none;
+      transition:transform .25s ease;
     }
-    /* Mobile: garante o logo inteiro dentro da tela */
+
+    /* ====== AJUSTE MOBILE: puxa a ARTE para cima, botões ficam no mesmo lugar ====== */
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{
-        object-fit:contain;
-        aspect-ratio:auto;
+        object-fit:cover;            /* mantém preenchido */
+        object-position:center top;  /* ancora mais no topo */
+        transform: translateY(-10%); /* sobe a arte */
+      }
+    }
+    @media (max-width: 480px){
+      #heroImg{
+        transform: translateY(-14%); /* sobe um pouco mais em telas muito pequenas */
+      }
+    }
+    @media (max-width: 360px){
+      #heroImg{
+        transform: translateY(-18%); /* sobe ainda mais nos menores */
       }
     }
 
@@ -221,7 +237,7 @@
   const secRank = document.getElementById('section-ranking');
 
   const btnStart   = document.getElementById('btnStart');
-  const btnRanking = document.getElementById('btnRanking');
+  theBtnRanking = document.getElementById('btnRanking');
   const btnVoltar  = document.getElementById('btnVoltar');
 
   const fxAbertura     = document.getElementById('fxAbertura');
@@ -256,7 +272,7 @@
     stopAllFx();
   });
 
-  btnRanking.addEventListener('click', ()=>{
+  theBtnRanking.addEventListener('click', ()=>{
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
     hero.style.transform  = 'translateY(-8px)';
     hero.style.opacity    = '0';
