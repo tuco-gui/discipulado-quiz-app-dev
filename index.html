@@ -7,64 +7,47 @@
   <meta name="theme-color" content="#000000" />
   <style>
     :root{
-      --bg:#000;
-      --green:#1fddac;
-      --green-700:#0fa17e;
-      --white:#ffffff;
-      --card:#0c0f0f;
-      --muted:#aab3b1;
-      --radius:14px;
-      --shadow:0 12px 40px rgba(0,0,0,.45);
-      --shadow-soft:0 8px 20px rgba(0,0,0,.35);
-      --pad: clamp(16px, 3vw, 28px);
-      --maxw: 1040px;
+      --bg:#000; --green:#1fddac; --green-700:#0fa17e; --white:#ffffff;
+      --card:#0c0f0f; --muted:#aab3b1; --radius:14px;
+      --shadow:0 12px 40px rgba(0,0,0,.45); --shadow-soft:0 8px 20px rgba(0,0,0,.35);
+      --pad: clamp(16px, 3vw, 28px); --maxw: 1040px;
     }
     *{box-sizing:border-box}
     html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
     img{display:block;max-width:100%}
     .hidden{display:none !important}
 
-    /* -------------------- HEADER -------------------- */
+    /* HEADER */
     header{
       position:fixed; inset:0 0 auto 0; height:56px;
       display:flex; align-items:center; justify-content:space-between;
-      padding:0 var(--pad);
-      z-index:40; pointer-events:none;
+      padding:0 var(--pad); z-index:40; pointer-events:none;
       background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));
     }
     .brand, .right{pointer-events:auto; display:flex; align-items:center; gap:12px;}
     .brand img{height:22px; opacity:.95}
-    /* Logo do jogo no topo direito (começa oculto) */
     .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45)); display:none;}
     @media (max-width:768px){ .title-logo{height:22px;} }
 
-    /* -------------------- HERO -------------------- */
+    /* HERO */
     #hero{
-      position:relative;
-      min-height:100svh;
+      position:relative; min-height:100svh;
       display:flex; align-items:flex-end; justify-content:center;
       padding: calc(56px + 10svh) var(--pad) calc(20svh);
-      background:#000;
-      overflow:hidden;
+      background:#000; overflow:hidden;
+      opacity:1; transform:none;
     }
     #hero .bg{ position:absolute; inset:0; z-index:0; display:grid; place-items:center;}
-    #heroImg{
-      width:100%; height:100%;
-      object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none;
-    }
+    #heroImg{ width:100%; height:100%; object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none; }
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
     }
+    #hero .cta{ position:relative; z-index:2; width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
 
-    #hero .cta{
-      position:relative; z-index:2; width:100%; max-width: min(780px, 92vw);
-      display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
-    }
     .btn{
-      appearance:none; border:0; border-radius:18px;
-      padding:18px 28px; font-weight:800; letter-spacing:.02em;
-      text-transform:uppercase; cursor:pointer;
+      appearance:none; border:0; border-radius:18px; padding:18px 28px;
+      font-weight:800; letter-spacing:.02em; text-transform:uppercase; cursor:pointer;
       box-shadow: var(--shadow);
       transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;
       will-change: transform;
@@ -74,14 +57,12 @@
     .btn.secondary{ background:var(--white); color:#0a0d0c }
     .btn.full{ flex:1 1 320px; }
 
-    /* -------------------- CONTEÚDOS -------------------- */
+    /* CONTEÚDO */
     main{display:grid; gap:28px; padding:24px var(--pad) 48px; max-width:var(--maxw); margin:0 auto}
     .card{
       background:rgba(12,15,15,.72); backdrop-filter: blur(6px);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding: min(28px, 3.2vw);
+      border:1px solid rgba(255,255,255,.06); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding: min(28px, 3.2vw);
     }
     h2{margin:0 0 14px; font-size:22px}
     label{display:block; font-size:14px; margin:14px 0 6px; color:#cdd5d3}
@@ -92,17 +73,13 @@
     .help{font-size:13px; color:#93a29f; margin-top:10px}
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .row .btn{min-width:180px}
-
     #section-form, #section-quiz, #section-ranking{display:none}
 
-    /* ------- Confirmação inline ------- */
-    .confirm-box{
-      margin-top:14px; padding:12px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.08); background:#0a0f0f;
-    }
+    /* CONFIRMAÇÃO */
+    .confirm-box{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0a0f0f; }
     .confirm-title{font-weight:800; margin-bottom:10px;}
 
-    /* ------- FX visuais ------- */
+    /* FX VISUAIS */
     #fxOverlay{ position:fixed; inset:0; pointer-events:none; z-index:60; }
     .fx-ok::after{
       content:""; position:absolute; inset:0; margin:auto;
@@ -134,7 +111,6 @@
       <img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'">
     </div>
     <div class="right">
-      <!-- LOGO do Show do Crentão (topo direito) -->
       <img id="crentaoLogo" class="title-logo" alt="Show do Crentão" />
     </div>
   </header>
@@ -259,13 +235,22 @@
   }
   function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
   function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
+  function goHome(){
+    // volta para a capa
+    hideAll();
+    stopAllFx();
+    toggleLogo(false);
+    hero.style.display='block';
+    // reseta efeito de fade usado na transição
+    hero.style.opacity='1';
+    hero.style.transform='none';
+  }
 
   /* ---------- logo do topo (usa exatamente img/logosc.png) ---------- */
   (async function carregaLogo(){
     const path = 'img/logosc.png';
     const ok = await testaImagem(path);
     if (ok) crentaoLogo.src = path;
-    // começa oculto; mostramos no quiz/ranking
   })();
 
   /* ---------- capa do hero ---------- */
@@ -298,7 +283,8 @@
     setTimeout(()=>{ hero.style.display='none'; hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking(); }, 360);
   });
 
-  btnVoltar.addEventListener('click', ()=>{ hideAll(); toggleLogo(false); secForm.style.display='block'; });
+  // agora volta pra HOME/capa
+  btnVoltar.addEventListener('click', goHome);
 
   /* ---------- storage + form ---------- */
   const nome = document.getElementById('nome');
@@ -365,7 +351,9 @@
   function renderPergunta(){
     const p = perguntas[idx];
     elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
-    elOps.innerHTML = ''; showActions();
+    elOps.innerHTML = '';
+    showActions();
+
     p.opcoes.forEach((txt,i)=>{
       const li = document.createElement('label');
       li.style.cssText='display:flex;gap:10px;align-items:center;margin:10px 0';
