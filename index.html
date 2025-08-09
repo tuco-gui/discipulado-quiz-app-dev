@@ -1,299 +1,411 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Show do Crentão — Sobrenatural Church</title>
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000" />
   <style>
     :root{
-      --bg:#000; --text:#fff; --muted:#cbd5e1;
-      --green:#1bd39b; --green-deep:#12b37f;
-      --white:#ffffff; --ink:#0b0f12;
-      --panel:#050a0a; --panel-2:#071313; --border:#0c1f1d;
+      --bg:#000;
+      --green:#1fddac;
+      --green-700:#0fa17e;
+      --white:#ffffff;
+      --card:#0c0f0f;
+      --muted:#aab3b1;
+      --radius:14px;
+      --shadow:0 12px 40px rgba(0,0,0,.45);
+      --shadow-soft:0 8px 20px rgba(0,0,0,.35);
+      --pad: clamp(16px, 3vw, 28px);
+      --maxw: 1040px;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:#000;color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
-
-    /* FUNDO: sua arte fixa + leve gradiente por cima */
-    body::before{
-      content:""; position:fixed; inset:0; z-index:-2;
-      background:
-        linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.88)),
-        url("img/cover.png");
-      background-repeat:no-repeat;
-      background-size:cover;
-      background-position:center 48%; /* DESKTOP: levemente acima do centro */
-    }
-    /* MOBILE: puxa mais pra cima pra não cortar o logo */
-    @media (max-width: 768px){
-      body::before{ background-position:center 34%; }
-    }
-    @media (max-width: 420px){
-      body::before{ background-position:center 26%; }
-    }
-
-    /* ====== LANDING: só os DOIS BOTÕES sobre a imagem ====== */
-    .landing{
-      min-height:100svh;
-      display:flex; align-items:flex-end; justify-content:center;
-      padding:0 16px 8vh;
-      transition:opacity .45s ease, transform .45s ease;
-    }
-    .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
-
-    .cta{
-      width:min(920px,100%);
-      display:grid; gap:18px; grid-template-columns:1fr 1fr;
-    }
-    @media (max-width:720px){ .cta{ grid-template-columns:1fr } }
-
-    .btn{
-      appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
-      font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
-      font-size:clamp(1rem,0.6rem + 1.4vw,1.6rem);
-      transition:transform .06s ease, box-shadow .2s ease, filter .2s;
-    }
-    .btn.start{color:#02110c;background:linear-gradient(180deg,var(--green),var(--green-deep));
-      box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
-      border:1px solid #10d49f}
-    .btn.start:hover{filter:saturate(1.15) brightness(1.02)}
-    .btn.start:active{transform:translateY(1px)}
-    .btn.rank{color:var(--ink);background:var(--white);border:1px solid #dfe7e4;box-shadow:0 6px 16px rgba(255,255,255,.08)}
-    .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
-    .btn.rank:active{transform:translateY(1px)}
-
-    /* ====== APP / telas internas ====== */
-    header.appbar{
-      position:sticky; top:0; z-index:5; padding:10px 16px;
-      border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
-      display:none; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .app-started header.appbar{ display:flex; }
-    .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.12))}
-    .brand-right{font-weight:900;letter-spacing:.02em}
-
-    main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
-    .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
-    .grid{display:grid;gap:14px}
-    .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
-    @media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr}}
+    html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+    a{color:inherit}
+    img{display:block;max-width:100%}
     .hidden{display:none !important}
-    label{font-weight:800;display:block;margin:8px 0 6px}
-    input[type="text"],input[type="tel"]{width:100%;background:#061010;color:#fff;border:1px solid #0c1f1d;border-radius:12px;padding:12px 14px;outline:none}
-    input[type="text"]:focus,input[type="tel"]:focus{border-color:#164a42}
-    .q{padding:14px;border:1px solid #0c1f1d;border-radius:12px;background:var(--panel-2)}
-    .q-title{font-weight:900;margin-bottom:10px}
-    .opt{display:grid;grid-template-columns:auto 1fr;gap:8px;margin:8px 0;align-items:start}
-    .notice{padding:10px;border:1px solid #0c1f1d;border-radius:12px;background:#071313;margin-top:10px}
-    .muted{color:var(--muted)}
-    .center{text-align:center}
-    .feedback{display:grid;place-items:center;min-height:110px;border:1px dashed #0c1f1d;border-radius:12px;background:#091515}
-    .feedback.ok{border-color:#14532d;background:#052e16}
-    .feedback.error{border-color:#7f1d1d;background:#2a1212}
-    .fx{position:relative;overflow:hidden}
-    .confetti{position:absolute;top:-10px;left:50%;width:6px;height:10px;background:#fff;animation:fall 1.5s linear infinite}
-    @keyframes fall{0%{transform:translate(-50%,-10px) rotate(0)}100%{transform:translate(calc(-50% + (var(--x) * 1px)),130px) rotate(360deg)}}
-    .rank-list{display:flex;flex-direction:column;gap:8px}
-    .rank-item{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #0c1f1d;border-radius:12px;background:#071313}
-    .rank-pos{width:42px;height:42px;display:grid;place-items:center;background:#081716;border-radius:10px;border:1px solid #0f2a26}
-    .score{font-weight:900}
+
+    /* -------------------- HEADER -------------------- */
+    header{
+      position:fixed; inset:0 0 auto 0; height:56px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 var(--pad);
+      z-index:40; pointer-events:none;
+      background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));
+    }
+    .brand, .title{pointer-events:auto; display:flex; align-items:center; gap:12px;}
+    .brand img{height:22px; opacity:.95}
+    .title{gap:10px; font-weight:600; font-size:14px; opacity:.9}
+
+    /* -------------------- HERO (PRIMEIRA TELA) -------------------- */
+    #hero{
+      position:relative;
+      min-height:100svh; /* certo no mobile */
+      display:flex; align-items:flex-end; justify-content:center;
+      padding: calc(56px + 10svh) var(--pad) calc(20svh);
+      background:#000;
+      overflow:hidden;
+    }
+    #hero .bg{
+      position:absolute; inset:0; z-index:0;
+      display:grid; place-items:center;
+    }
+    #heroImg{
+      width:100%; height:100%;
+      object-fit:cover;               /* desktop */
+      user-select:none; -webkit-user-drag:none;
+      filter:none;                    /* sem escurecer */
+    }
+    /* Mobile: garante o logo inteiro dentro da tela */
+    @media (max-width: 768px){
+      #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
+      #heroImg{
+        object-fit:contain;
+        aspect-ratio:auto;
+      }
+    }
+
+    #hero .cta{
+      position:relative; z-index:2;
+      width:100%; max-width: min(780px, 92vw);
+      display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+    }
+    .btn{
+      appearance:none; border:0; border-radius:18px;
+      padding:18px 28px; font-weight:800; letter-spacing:.02em;
+      text-transform:uppercase; cursor:pointer;
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;
+      will-change: transform;
+    }
+    .btn:active{transform: translateY(1px); box-shadow: var(--shadow-soft);}
+    .btn.primary{
+      background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%);
+      color:#06261f;
+    }
+    .btn.secondary{ background:var(--white); color:#0a0d0c }
+    .btn.full{ flex:1 1 320px; }
+
+    /* -------------------- CONTEÚDOS (form, quiz, ranking) -------------------- */
+    main{display:grid; gap:28px; padding:24px var(--pad) 48px; max-width:var(--maxw); margin:0 auto}
+    .card{
+      background:rgba(12,15,15,.72); backdrop-filter: blur(6px);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding: min(28px, 3.2vw);
+    }
+    h2{margin:0 0 14px; font-size:22px}
+    label{display:block; font-size:14px; margin:14px 0 6px; color:#cdd5d3}
+    input[type="text"], input[type="tel"]{
+      width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+      background:#0b0f0e; color:#fff; outline:none;
+    }
+    .help{font-size:13px; color:#93a29f; margin-top:10px}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .row .btn{min-width:180px}
+
+    /* Esconde as seções até acioná-las */
+    #section-form, #section-quiz, #section-ranking{display:none}
   </style>
 </head>
 <body>
-  <!-- APPBAR (só depois que clicar) -->
-  <header class="appbar">
-    <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
-    <div class="brand-right">Show do Crentão</div>
+
+  <!-- topo -->
+  <header>
+    <div class="brand">
+      <img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'">
+    </div>
+    <div class="title">Show do Crentão</div>
   </header>
 
-  <!-- LANDING: APENAS OS DOIS BOTÕES -->
-  <section id="landing" class="landing">
+  <!-- PRIMEIRA TELA -->
+  <section id="hero">
+    <div class="bg">
+      <!-- a imagem será escolhida via JS dentre vários nomes possíveis -->
+      <img id="heroImg" alt="Capa – Show do Crentão" class="hidden">
+    </div>
     <div class="cta">
-      <button id="goParticipar" class="btn start">Iniciar</button>
-      <button id="goRanking"   class="btn rank">Ranking</button>
+      <button id="btnStart" class="btn primary full">Iniciar</button>
+      <button id="btnRanking" class="btn secondary full">Ranking</button>
     </div>
   </section>
 
+  <!-- CONTEÚDOS -->
   <main>
-    <!-- CADASTRO -->
-    <section id="screen-register" class="card grid hidden">
+
+    <!-- FORM PARTICIPANTE -->
+    <section id="section-form" class="card">
       <h2>Dados do participante</h2>
-      <div><label for="nome">Nome completo</label><input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name"></div>
-      <div><label for="fone">Telefone (com DDD)</label><input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel"></div>
-      <div class="notice muted">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
-      <div><button id="btnSendRegister" class="btn start">Enviar</button></div>
-      <div id="msgRegister" class="notice hidden"></div>
+      <label>Nome completo</label>
+      <input id="nome" type="text" placeholder="Ex.: Maria Silva">
+
+      <label>Telefone (com DDD)</label>
+      <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
+
+      <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
+
+      <div class="row" style="margin-top:16px">
+        <button id="btnEnviarDados" class="btn primary">Enviar</button>
+      </div>
     </section>
 
     <!-- QUIZ -->
-    <section id="screen-quiz" class="card grid hidden">
-      <div class="grid" id="quizStep"></div>
-      <div id="quizMsg" class="notice hidden"></div>
-    </section>
-
-    <!-- RESULTADO -->
-    <section id="screen-result" class="card grid hidden center">
-      <h2>Resultado</h2>
-      <p id="resultText" class="muted"></p>
-      <div class="grid-2">
-        <button id="btnVerRanking" class="btn rank">Ver Ranking</button>
-        <button id="btnVoltarInicio" class="btn rank">Início</button>
+    <section id="section-quiz" class="card">
+      <h2 id="quizPergunta">Pergunta</h2>
+      <div id="quizOpcoes"></div>
+      <div class="row" style="margin-top:16px">
+        <button id="btnResponder" class="btn primary">Enviar</button>
+        <button id="btnLimpar" class="btn secondary">Limpar</button>
       </div>
+
+      <audio id="fxCerteza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
+      <audio id="fxEntendeu" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
+      <audio id="fxEstaCerto" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
+      <audio id="fxQualResposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
+      <audio id="fxCertaResposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
+      <audio id="fxErrou" src="audio/faustao-errou.mp3" preload="auto"></audio>
+      <audio id="fxAbertura" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
     </section>
 
     <!-- RANKING -->
-    <section id="screen-ranking" class="card grid hidden">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-        <h2 style="margin:0;">Ranking</h2>
-        <button id="btnVoltarHome" class="btn rank">Voltar</button>
+    <section id="section-ranking" class="card">
+      <h2>Ranking</h2>
+      <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
+      <div class="row" style="margin-top:16px">
+        <button id="btnVoltar" class="btn secondary">Voltar</button>
       </div>
-      <div id="rankCount" class="muted"></div>
-      <div id="rankList" class="rank-list"></div>
     </section>
+
   </main>
 
-  <!-- ÁUDIOS -->
-  <audio id="sfx-intro"        src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
-  <audio id="sfx-pergunta"     src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3"   preload="auto"></audio>
-  <audio id="sfx-certeza"      src="audio/silvio-santos-voce-tem-certeza.mp3"           preload="auto"></audio>
-  <audio id="sfx-esta-certo"   src="audio/silvio-santos-esta-certo-disso.mp3"           preload="auto"></audio>
-  <audio id="sfx-qual-resposta"src="audio/silvio-santos-qual-e-a-resposta-certa.mp3"    preload="auto"></audio>
-  <audio id="sfx-certa-resposta"src="audio/silvio-santos-certa-resposta.mp3"            preload="auto"></audio>
-  <audio id="sfx-errou"        src="audio/faustao-errou.mp3"                             preload="auto"></audio>
+<script>
+(function(){
+  /* --------------- Landing: escolher automaticamente a capa --------------- */
+  const hero = document.getElementById('hero');
+  const heroImg = document.getElementById('heroImg');
 
-  <script>
-    /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v8-fundo-fixo-mobile-up'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
-    const $ = id => document.getElementById(id);
-    const normPhone = s => (s||'').replace(/\D+/g,'');
-    const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
-    const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-    function loadAll(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):{submissions:[]}; }catch(e){ return {submissions:[]};}}
-    function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
-    function show(id){ ['screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
+  const candidatos = [
+    'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
+    'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
+    'img/logosc.png' // fallback (o logo que você me mandou)
+  ];
 
-    /* ÁUDIO INTRO */
-    const intro=$('sfx-intro');
-    const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
-    const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
-
-    /* Entradas da landing */
-    function enterApp(next){
-      $('landing').classList.add('hide');
-      document.body.classList.add('app-started'); // mostra appbar
-      setTimeout(next, 420);
-    }
-
-    $('goParticipar').addEventListener('click', ()=>{ startIntro(); enterApp(()=> show('screen-register'));});
-    $('goRanking').addEventListener('click',   ()=>{ stopIntro();  enterApp(()=>{ renderRanking(); show('screen-ranking');});});
-
-    function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
-    function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
-
-    /* CADASTRO */
-    $('btnSendRegister').addEventListener('click', ()=>{
-      const name=titleCase(($('nome').value||'')); const phoneRaw=normPhone(($('fone').value||'')); const box=$('msgRegister'); clearMsg(box);
-      if(!name||name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
-      if(!phoneRaw||phoneRaw.length<10) return setMsg(box,'Informe um telefone válido com DDD.','warn');
-      const all=loadAll();
-      if(all.submissions.some(s=>s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw))
-        return setMsg(box,'Você já respondeu este quiz e não pode responder novamente.','error');
-      stopIntro(); // para música ao enviar
-      sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
-      quizState.index=0; quizState.correct=0; quizState.selected=null;
-      renderCurrentQuestion(); show('screen-quiz');
+  function tenta(src){
+    return new Promise(resolve=>{
+      const i = new Image();
+      i.onload = ()=>resolve(src);
+      i.onerror = ()=>resolve(null);
+      i.src = src + '?v=' + Date.now(); // evita cache travado
     });
+  }
 
-    /* QUIZ */
-    const QUESTIONS=[
-      {title:"O que caracteriza a obediência imediata?",
-       options:["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],correctIndex:1},
-      {title:"O que é fé genuína segundo o estudo?",
-       options:["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],correctIndex:2},
-      {title:"Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
-       options:["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],correctIndex:1},
-      {title:"Qual é a importância de testemunhar as obras de Deus?",
-       options:["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],correctIndex:1}
-    ];
-    const quizState={index:0, correct:0, selected:null};
-
-    function renderCurrentQuestion(){
-      stopIntro();
-      const step=$('quizStep'); step.innerHTML='';
-      const q=QUESTIONS[quizState.index];
-      const wrap=document.createElement('div'); wrap.className='grid';
-      const title=document.createElement('div'); title.className='q-title'; title.textContent=`Pergunta ${quizState.index+1} de ${QUESTIONS.length}: `+q.title;
-      const qsBox=document.createElement('div'); qsBox.className='q';
-      q.options.forEach((opt,oi)=>{ const lbl=document.createElement('label'); lbl.className='opt';
-        const inp=document.createElement('input'); inp.type='radio'; inp.name='alt'; inp.value=oi; inp.addEventListener('change',()=> quizState.selected=oi);
-        const span=document.createElement('span'); span.textContent=opt; lbl.appendChild(inp); lbl.appendChild(span); qsBox.appendChild(lbl); });
-      const row=document.createElement('div'); row.className='grid-2';
-      const btnEnviar=document.createElement('button'); btnEnviar.className='btn start'; btnEnviar.textContent='Enviar';
-      const btnLimpar=document.createElement('button'); btnLimpar.className='btn rank'; btnLimpar.textContent='Limpar';
-      row.appendChild(btnEnviar); row.appendChild(btnLimpar);
-      const fb=document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
-      wrap.appendChild(title); wrap.appendChild(qsBox); wrap.appendChild(row); wrap.appendChild(fb); step.appendChild(wrap);
-      btnLimpar.addEventListener('click',()=>{ quizState.selected=null; qsBox.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false); });
-      btnEnviar.addEventListener('click',()=>{ if(quizState.selected===null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return;}
-        askConfirmation(fb, ()=> evaluateAnswer(fb)); });
-      playOne(['sfx-pergunta']);
+  (async function acharCapa(){
+    let achou = null;
+    for (const src of candidatos){
+      achou = await tenta(src);
+      if (achou) break;
     }
-
-    function askConfirmation(container,onConfirm){
-      playOne(Math.random()<0.5?['sfx-certeza']:['sfx-esta-certo']);
-      container.className='feedback fx'; container.innerHTML='';
-      const p=document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
-      const row=document.createElement('div'); row.className='grid-2';
-      const btnConf=document.createElement('button'); btnConf.className='btn start'; btnConf.textContent='Confirmar';
-      const btnCanc=document.createElement('button'); btnCanc.className='btn rank'; btnCanc.textContent='Cancelar';
-      row.appendChild(btnConf); row.appendChild(btnCanc); container.appendChild(p); container.appendChild(row); container.classList.remove('hidden');
-      btnConf.addEventListener('click',onConfirm); btnCanc.addEventListener('click',()=>{container.classList.add('hidden');container.innerHTML='';});
+    if (achou){
+      heroImg.src = achou;
+      heroImg.classList.remove('hidden');
+    } else {
+      // sem imagem: mantém fundo preto mesmo (sem aviso na tela)
+      hero.style.background = '#000';
     }
+  })();
 
-    function simpleConfetti(container){
-      for(let i=0;i<22;i++){ const c=document.createElement('div'); c.className='confetti'; c.style.left='50%'; c.style.setProperty('--x',(Math.random()*200-100).toFixed(0));
-        c.style.background=`hsl(${Math.floor(Math.random()*360)},100%,70%)`; c.style.animationDuration=(1+Math.random()*0.8).toFixed(2)+'s';
-        container.appendChild(c); setTimeout(()=> c.remove(),1700); }
-    }
-    function evaluateAnswer(fb){
-      const q=QUESTIONS[quizState.index]; const ok=(quizState.selected===q.correctIndex);
-      if(ok){ quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!'; playOne(['sfx-certa-resposta']); simpleConfetti(fb); }
-      else { fb.className='feedback error'; fb.textContent='Resposta errada!'; playOne(['sfx-errou']); }
-      setTimeout(()=>{ quizState.selected=null; if(quizState.index<QUESTIONS.length-1){ quizState.index++; renderCurrentQuestion(); } else { finishQuiz(); } },2000);
-    }
-    function playOne(ids){ try{ ids.forEach(id=>{ const el=document.getElementById(id); if(el){ el.currentTime=0; el.play().catch(()=>{});} }); }catch(e){} }
+  /* --------------- Navegação simples --------------- */
+  const secForm = document.getElementById('section-form');
+  const secQuiz = document.getElementById('section-quiz');
+  const secRank = document.getElementById('section-ranking');
 
-    function finishQuiz(){
-      const part=JSON.parse(sessionStorage.getItem('quiz_participant')||'null'); if(!part){ show('screen-register'); return; }
-      const store=loadAll();
-      if(store.submissions.some(s=>s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){ show('screen-register'); return; }
-      const item={name:part.name, phone:part.phone, score:quizState.correct, total:QUESTIONS.length, timestamp:nowISO()};
-      store.submissions.push(item); saveAll(store);
-      document.getElementById('resultText').textContent=`Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
-      show('screen-result'); sessionStorage.removeItem('quiz_participant');
-    }
+  const btnStart   = document.getElementById('btnStart');
+  const btnRanking = document.getElementById('btnRanking');
+  const btnVoltar  = document.getElementById('btnVoltar');
 
-    /* RANKING */
-    function renderRanking(){
-      const list=document.getElementById('rankList'); const count=document.getElementById('rankCount');
-      const data=[...loadAll().submissions];
-      data.sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
-      count.textContent=data.length?`Total de participantes: ${data.length}`:'Sem participantes.';
-      if(!data.length){ list.innerHTML='<div class="muted">Sem envios ainda.</div>'; return; }
-      list.innerHTML=data.map((r,i)=>`<div class="rank-item">
-        <div class="rank-pos">${i+1}</div>
-        <div><div style="font-weight:900">${r.name}</div><div class="muted">${maskPhone(r.phone)} · ${r.timestamp}</div></div>
-        <div class="score">${r.score}/${r.total}</div>
-      </div>`).join('');
-    }
-    function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p;
-      return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
+  const fxAbertura     = document.getElementById('fxAbertura');
+  const fxCerteza      = document.getElementById('fxCerteza');
+  const fxEntendeu     = document.getElementById('fxEntendeu');
+  const fxEstaCerto    = document.getElementById('fxEstaCerto');
+  const fxQualResposta = document.getElementById('fxQualResposta');
+  const fxCerta        = document.getElementById('fxCertaResposta');
+  const fxErrou        = document.getElementById('fxErrou');
 
-    document.getElementById('btnVerRanking').addEventListener('click',()=>{ renderRanking(); show('screen-ranking'); });
-    document.getElementById('btnVoltarInicio').addEventListener('click',()=> location.reload());
-    document.getElementById('btnVoltarHome').addEventListener('click',()=> location.reload());
-  </script>
+  function hideAll(){
+    secForm.style.display = 'none';
+    secQuiz.style.display = 'none';
+    secRank.style.display = 'none';
+  }
+  function stopAllFx(){
+    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou]
+      .forEach(a=>{ try{a.pause(); a.currentTime=0;}catch(_){}});
+  }
+
+  btnStart.addEventListener('click', ()=>{
+    // anima “sumir” a primeira tela
+    hero.style.transition = 'transform .35s ease, opacity .35s ease';
+    hero.style.transform  = 'translateY(-8px)';
+    hero.style.opacity    = '0';
+    setTimeout(()=>{
+      hero.style.display='none';
+      // abre o form
+      hideAll();
+      secForm.style.display='block';
+    }, 360);
+    stopAllFx();
+  });
+
+  btnRanking.addEventListener('click', ()=>{
+    hero.style.transition = 'transform .35s ease, opacity .35s ease';
+    hero.style.transform  = 'translateY(-8px)';
+    hero.style.opacity    = '0';
+    setTimeout(()=>{
+      hero.style.display='none';
+      hideAll();
+      secRank.style.display='block';
+      renderRanking();
+    }, 360);
+    stopAllFx();
+  });
+
+  btnVoltar.addEventListener('click', ()=>{
+    hideAll();
+    secForm.style.display='block';
+  });
+
+  /* --------------- Form + bloqueio 1x por telefone --------------- */
+  const nome = document.getElementById('nome');
+  const fone = document.getElementById('fone');
+  const btnEnviarDados = document.getElementById('btnEnviarDados');
+
+  const LS = {
+    get: (k,def)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch(_){return def} },
+    set: (k,v)=>localStorage.setItem(k, JSON.stringify(v))
+  };
+
+  btnEnviarDados.addEventListener('click', ()=>{
+    const n = (nome.value||'').trim();
+    const f = (fone.value||'').trim();
+    if(!n || !f){ alert('Preencha nome e telefone.'); return; }
+    const ja = LS.get('respondidos', {});
+    if(ja[f]){ alert('Este telefone já respondeu.'); return; }
+    // salva e segue para o quiz
+    ja[f] = { nome:n, quando: Date.now() };
+    LS.set('respondidos', ja);
+    participanteAtual = { nome:n, fone:f, pontos:0 };
+    iniciarQuiz();
+  });
+
+  /* --------------- Quiz (uma por vez) --------------- */
+  const perguntas = [
+    {
+      enunciado: "O que é fé genuína segundo o estudo?",
+      opcoes: [
+        "Fé baseada no testemunho de outras pessoas.",
+        "Fé emocional despertada em um culto.",
+        "Fé verdadeira e pessoal, que cresce com exercício.",
+        "Fé herdada de familiares."
+      ],
+      certa: 2
+    },
+    {
+      enunciado: "Qual foi o primeiro aspecto importante na vida de Abraão?",
+      opcoes: ["Obediência imediata","Caridade","Riqueza","Fama"],
+      certa: 0
+    },
+    {
+      enunciado: "A obediência, segundo a aula, é sobretudo…",
+      opcoes: [
+        "um ato de submissão cega.",
+        "uma expressão de amor e confiança em Deus.",
+        "uma tradição da igreja.",
+        "uma estratégia para evitar problemas."
+      ],
+      certa: 1
+    },
+    {
+      enunciado: "Qual é a característica primordial do cristão destacada na aula?",
+      opcoes: ["Popularidade","Prosperidade","Perseverança","Carisma"],
+      certa: 2
+    }
+  ];
+
+  let participanteAtual = null;
+  let idx = 0, escolha = null;
+
+  const elPerg = document.getElementById('quizPergunta');
+  const elOps  = document.getElementById('quizOpcoes');
+  const btnResp= document.getElementById('btnResponder');
+  const btnLimpar = document.getElementById('btnLimpar');
+
+  function iniciarQuiz(){
+    hideAll();
+    secQuiz.style.display='block';
+    idx = 0; escolha = null;
+    fxEntendeu.play().catch(()=>{});
+    renderPergunta();
+  }
+
+  function renderPergunta(){
+    const p = perguntas[idx];
+    elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
+    elOps.innerHTML = '';
+    p.opcoes.forEach((txt,i)=>{
+      const id = `op${idx}_${i}`;
+      const li = document.createElement('label');
+      li.style.display='flex'; li.style.gap='10px'; li.style.alignItems='center'; li.style.margin='10px 0';
+      li.innerHTML = `<input type="radio" name="op" id="${id}" value="${i}" /> <span>${txt}</span>`;
+      elOps.appendChild(li);
+    });
+    elOps.querySelectorAll('input[name=op]').forEach(r=>{
+      r.addEventListener('change', ()=>{ escolha = +r.value; });
+    });
+  }
+
+  btnResp.addEventListener('click', ()=>{
+    if(escolha===null){ fxCerteza.play().catch(()=>{}); return; }
+    // Confirmação estilo Show do Milhão
+    fxEstaCerto.play().catch(()=>{});
+    setTimeout(()=>{
+      const p = perguntas[idx];
+      const ok = (escolha===p.certa);
+      if(ok){ participanteAtual.pontos++; fxCerta.play().catch(()=>{}); }
+      else { fxErrou.play().catch(()=>{}); }
+      // próxima
+      idx++;
+      escolha=null;
+      if(idx<perguntas.length) renderPergunta();
+      else finalizar();
+    }, 900);
+  });
+
+  btnLimpar.addEventListener('click', ()=>{
+    elOps.querySelectorAll('input[name=op]').forEach(r=>r.checked=false);
+    escolha=null;
+  });
+
+  function finalizar(){
+    // grava no ranking
+    const rank = LS.get('ranking', []);
+    rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: participanteAtual.pontos, quando: Date.now() });
+    // ordena: maior pontuação primeiro, empate pelo mais cedo
+    rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
+    LS.set('ranking', rank);
+    hideAll();
+    secRank.style.display='block';
+    renderRanking();
+  }
+
+  function renderRanking(){
+    const rank = LS.get('ranking', []);
+    const box = document.getElementById('rankingLista');
+    if(!rank.length){ box.textContent = 'Sem participantes por enquanto.'; return; }
+    const linhas = rank.map((r,i)=> `${i+1}. ${r.nome} — ${r.fone} — ${r.pontos} ponto(s)`);
+    box.innerHTML = linhas.map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join('');
+  }
+
+})();
+</script>
 </body>
 </html>
