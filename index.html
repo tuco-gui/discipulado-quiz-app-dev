@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Discipulado Nível 2 — Quiz (Aula 1)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #e11d48;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --ok: #10b981;
+      --warn: #f59e0b;
+      --error: #ef4444;
+      --card: #0b1220;
+      --border: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background: radial-gradient(1000px 600px at 10% 0%, #0b1020, #0a0f1c 40%, #070a14); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; line-height:1.4; }
+    header { padding: 28px 16px 12px; text-align:center; }
+    h1 { font-weight:800; letter-spacing:-0.02em; font-size: clamp(1.4rem, 1.2rem + 1.5vw, 2.2rem); margin:0 0 6px; }
+    .sub { color: var(--muted); font-size:.95rem; }
+    .container { max-width:980px; margin:16px auto 64px; padding:0 16px; display:grid; grid-template-columns:1fr; gap:16px; }
+    @media (min-width:960px){ .container{ grid-template-columns:2fr 1.3fr; } }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0)); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.35); }
+    .card h2 { margin:0 0 10px; font-size:1.1rem; letter-spacing:.02em; }
+    .divider { height:1px; background:var(--border); margin:12px 0 16px; }
+    label { display:block; font-weight:600; margin:10px 0 6px; }
+    input[type="text"], input[type="tel"]{ width:100%; border:1px solid var(--border); background:#0a0f1b; color:var(--text); border-radius:10px; padding:12px 14px; outline:none; }
+    input[type="text"]:focus, input[type="tel"]:focus{ border-color:#334155; }
+    .q { margin:14px 0 18px; padding:12px; border:1px solid var(--border); border-radius:10px; background:#0b1220; }
+    .q-title { font-weight:700; margin-bottom:8px; }
+    .opt { margin:8px 0; display:grid; grid-template-columns:auto 1fr; gap:8px; align-items:start; }
+    .muted { color:var(--muted); font-size:.92rem; }
+    .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    button { appearance:none; border:0; background:var(--accent); color:white; padding:12px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
+    button.secondary { background:#334155; }
+    button.ghost { background:transparent; border:1px solid var(--border); color:var(--text); }
+    .tag { display:inline-block; font-size:.82rem; padding:4px 8px; border-radius:999px; background:#0f172a; border:1px solid var(--border); color:var(--muted); }
+    table { width:100%; border-collapse:collapse; font-size:.95rem; }
+    th, td { border-bottom:1px solid var(--border); padding:10px 8px; text-align:left; }
+    th { color:var(--muted); font-weight:600; }
+    .ok { color:var(--ok); font-weight:700; }
+    .warn { color:var(--warn); font-weight:700; }
+    .error { color:var(--error); font-weight:700; }
+    .help { font-size:.85rem; color:var(--muted); }
+    .notice { margin-top:10px; padding:10px; border-radius:10px; background:#0a0f1b; border:1px solid var(--border); }
+    .center { text-align:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Discipulado Nível 2 — Quiz (Aula 1)</h1>
+    <div class="sub">Sobrenatural Church · Ministrantes: Ederson e Thalita · Tema: <span class="tag">O Privilégio do Chamado</span></div>
+  </header>
+
+  <div class="container">
+    <main class="card" id="app">
+      <h2>Dados do participante</h2>
+      <p class="help">Preencha seu nome completo e telefone com DDD. As respostas não podem ser alteradas após o envio.</p>
+      <div class="row">
+        <div style="flex:1 1 260px; min-width:260px;">
+          <label for="nome">Nome completo</label>
+          <input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name" />
+        </div>
+        <div style="flex:1 1 220px; min-width:220px;">
+          <label for="fone">Telefone (com DDD)</label>
+          <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000" autocomplete="tel" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <h2>Perguntas</h2>
+      <form id="quizForm" novalidate></form>
+
+      <div class="row" style="margin-top:14px;">
+        <button id="btnEnviar" type="button">Enviar respostas</button>
+        <button id="btnLimpar" type="button" class="ghost">Limpar seleção</button>
+      </div>
+      <div id="msg" class="notice" role="status" aria-live="polite" style="display:none;"></div>
+
+      <div class="notice" style="margin-top:14px;">
+        <strong>Privacidade:</strong> Este app salva seus dados <em>somente</em> no navegador (LocalStorage). Para ranking multi-dispositivo, use “Exportar CSV” e consolide em uma planilha.
+      </div>
+    </main>
+
+    <aside class="card">
+      <h2>Ranking</h2>
+      <div class="row" style="margin-bottom:10px;">
+        <button id="btnExport" type="button" class="secondary">Exportar CSV</button>
+        <button id="btnReset" type="button" class="ghost">Reset (admin)</button>
+      </div>
+      <table aria-describedby="rankingHelp">
+        <thead>
+          <tr><th>#</th><th>Participante</th><th>Telefone</th><th>Pontuação</th><th>Data</th></tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+      <p id="rankingHelp" class="help">Critério: maior pontuação primeiro; desempate por data/hora (mais cedo primeiro).</p>
+    </aside>
+  </div>
+
+  <script>
+    const QUIZ_VERSION = 'v1';
+    const STORAGE_KEY = 'discipulado_quiz_' + QUIZ_VERSION;
+    const QUESTIONS = [
+      { title: "O que caracteriza a obediência imediata?",
+        options: ["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],
+        correctIndex: 1 },
+      { title: "O que é fé genuína segundo o estudo?",
+        options: ["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
+        correctIndex: 2 },
+      { title: "Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
+        options: ["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],
+        correctIndex: 1 },
+      { title: "Qual é a importância de testemunhar as obras de Deus?",
+        options: ["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],
+        correctIndex: 1 }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const normPhone = s => (s||'').replace(/\\D+/g,'');
+    const nowISO = () => {
+      const d = new Date(), p=n=>String(n).padStart(2,'0');
+      return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+    };
+    const titleCase = s => s.trim().replace(/\\s+/g,' ').split(' ').map(w => w[0]?.toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+
+    function loadAll(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): { submissions: [] }; } catch(e){ return { submissions: [] }; } }
+    function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+    function renderQuiz(){
+      const form = $('quizForm'); form.innerHTML='';
+      QUESTIONS.forEach((q, qi) => {
+        const fs = document.createElement('fieldset'); fs.className='q';
+        fs.innerHTML = \`<legend class="q-title">\${qi+1}. \${q.title}</legend>\` + q.options.map((opt, oi) =>
+          \`<label class="opt"><input type="radio" name="q\${qi}" value="\${oi}"><span>\${opt}</span></label>\`
+        ).join('');
+        form.appendChild(fs);
+      });
+    }
+
+    function maskPhone(p){
+      const d = normPhone(p);
+      if (d.length < 10) return p;
+      return d.length===11 ? \`(\${d.slice(0,2)}) \${d.slice(2,7)}-\${d.slice(7)}\` : \`(\${d.slice(0,2)}) \${d.slice(2,6)}-\${d.slice(6)}\`;
+    }
+
+    function renderRanking(){
+      const body = $('rankingBody');
+      const rows = [...loadAll().submissions].sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
+      body.innerHTML = rows.map((r,i)=> \`
+        <tr><td>\${i+1}</td><td>\${r.name}</td><td>\${r.phoneMasked}</td><td><strong>\${r.score}</strong>/\${QUESTIONS.length}</td><td>\${r.timestamp}</td></tr>\`
+      ).join('') || '<tr><td colspan="5" class="muted center">Sem envios ainda.</td></tr>';
+    }
+
+    function setMsg(t, type='ok'){ const m=$('msg'); m.className='notice '+type; m.textContent=t; m.style.display='block'; }
+    function clearMsg(){ const m=$('msg'); m.style.display='none'; m.textContent=''; }
+
+    function validate(){
+      const name = titleCase($('nome').value||'');
+      const phoneRaw = normPhone($('fone').value||'');
+      if (!name || name.length<3) return { ok:false, error:'Informe seu nome completo.' };
+      if (!phoneRaw || phoneRaw.length<10) return { ok:false, error:'Informe um telefone válido com DDD.' };
+      const ans=[];
+      for(let i=0;i<QUESTIONS.length;i++){ const sel = document.querySelector('input[name="q'+i+'"]:checked'); if(!sel) return { ok:false, error:'Responda todas as perguntas.' }; ans.push(parseInt(sel.value,10)); }
+      return { ok:true, name, phoneRaw, answers: ans };
+    }
+    const scoreOf = answers => answers.reduce((s,a,i)=> s + (a===QUESTIONS[i].correctIndex?1:0), 0);
+    const already = phone => loadAll().submissions.find(s=> s.phone===phone);
+
+    function submitQuiz(){
+      clearMsg();
+      const v = validate();
+      if (!v.ok){ setMsg(v.error,'warn'); return; }
+      const prev = already(v.phoneRaw);
+      if (prev){ if (!confirm('Já existe um envio para este telefone. Deseja substituir?')){ setMsg('Envio cancelado.', 'warn'); return; } }
+      const item = { name: v.name, phone: v.phoneRaw, phoneMasked: maskPhone(v.phoneRaw), answers: v.answers, score: scoreOf(v.answers), timestamp: nowISO() };
+      const all = loadAll();
+      let updated=false;
+      for(let i=0;i<all.submissions.length;i++){ if(all.submissions[i].phone===v.phoneRaw){ all.submissions[i]=item; updated=true; break; } }
+      if(!updated) all.submissions.push(item);
+      saveAll(all);
+      const sorted=[...all.submissions].sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
+      const pos = sorted.findIndex(s=> s.phone===v.phoneRaw)+1;
+      setMsg(\`Respostas enviadas! Pontuação: \${item.score}/\${QUESTIONS.length} — Posição: #\${pos}\`, 'ok');
+      renderRanking();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+
+    function clearSelection(){ document.querySelectorAll('#quizForm input[type=radio]').forEach(r=> r.checked=false); clearMsg(); }
+    function resetAll(){ if(!confirm('Apagar TODOS os envios deste navegador?')) return; saveAll({submissions:[]}); renderRanking(); setMsg('Ranking apagado.', 'ok'); }
+    function exportCSV(){
+      const rows = [['Nome','Telefone','Pontuação','Total','Data','Respostas']];
+      loadAll().submissions.forEach(s=> rows.push([s.name, s.phoneMasked, String(s.score), String(QUESTIONS.length), s.timestamp, s.answers.map(a=>a+1).join('|')]));
+      const csv = rows.map(r => r.map(c => '\"'+String(c).replace(/\"/g,'\"\"')+'\"').join(',')).join('\\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='ranking_quiz_discipulado.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    renderQuiz(); renderRanking();
+    $('btnEnviar').addEventListener('click', submitQuiz);
+    $('btnLimpar').addEventListener('click', clearSelection);
+    $('btnReset').addEventListener('click', resetAll);
+    $('btnExport').addEventListener('click', exportCSV);
+  </script>
+</body>
+</html>
