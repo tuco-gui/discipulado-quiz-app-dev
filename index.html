@@ -40,7 +40,7 @@
     /* -------------------- HERO (PRIMEIRA TELA) -------------------- */
     #hero{
       position:relative;
-      min-height:100svh; /* certo no mobile */
+      min-height:100svh;
       display:flex; align-items:flex-end; justify-content:center;
       padding: calc(56px + 10svh) var(--pad) calc(20svh);
       background:#000;
@@ -54,15 +54,15 @@
       width:100%; height:100%;
       object-fit:cover;               /* DESKTOP */
       user-select:none; -webkit-user-drag:none;
-      filter:none;                    /* sem escurecer */
+      filter:none;
     }
 
     /* ===== AJUSTE MOBILE: apenas SUBIR a imagem, sem mudar o tamanho ===== */
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{
-        object-fit:contain;           /* como já estava */
-        aspect-ratio:auto;            /* como já estava */
+        object-fit:contain;
+        aspect-ratio:auto;
         object-position: center 70px; /* ajuste fino vertical */
       }
     }
@@ -131,7 +131,6 @@
   <!-- PRIMEIRA TELA -->
   <section id="hero">
     <div class="bg">
-      <!-- a imagem será escolhida via JS dentre vários nomes possíveis -->
       <img id="heroImg" alt="Capa – Show do Crentão" class="hidden">
     </div>
     <div class="cta">
@@ -164,7 +163,7 @@
       <h2 id="quizPergunta">Pergunta</h2>
       <div id="quizOpcoes"></div>
 
-      <!-- Confirmação inline (AGORA SOMENTE CONFIRMAR) -->
+      <!-- Confirmação inline (somente Confirmar) -->
       <div id="confirmBox" class="confirm-box hidden">
         <div class="confirm-title">Você tem certeza da resposta?</div>
         <div class="row">
@@ -190,7 +189,6 @@
     <section id="section-ranking" class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <h2>Ranking</h2>
-        <!-- Botão DEV aparece só quando URL tem #dev -->
         <button id="btnResetDev" class="btn secondary hidden" title="Apenas no modo dev">Limpar ranking (DEV)</button>
       </div>
       <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
@@ -203,37 +201,53 @@
 
 <script>
 (function(){
-  /* --------------- Landing: escolher automaticamente a capa --------------- */
+  /* --------------- Helpers --------------- */
   const hero = document.getElementById('hero');
   const heroImg = document.getElementById('heroImg');
 
+  const fxAbertura     = document.getElementById('fxAbertura');
+  const fxCerteza      = document.getElementById('fxCerteza');
+  const fxEntendeu     = document.getElementById('fxEntendeu');
+  const fxEstaCerto    = document.getElementById('fxEstaCerto');
+  const fxQualResposta = document.getElementById('fxQualResposta');
+  const fxCerta        = document.getElementById('fxCertaResposta');
+  const fxErrou        = document.getElementById('fxErrou');
+
+  const canPlay = a => { try { a.currentTime=0; a.play().catch(()=>{}); } catch(e){} };
+  const stop = a => { try { a.pause(); a.currentTime=0; } catch(e){} };
+  const stopAllFx = ()=>[fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou].forEach(stop);
+
+  // Tocar e aguardar terminar (evita sobreposição)
+  function playAndWait(audio){
+    return new Promise(resolve=>{
+      try{
+        audio.currentTime = 0;
+        const onEnd = ()=>{ audio.removeEventListener('ended', onEnd); resolve(); };
+        audio.addEventListener('ended', onEnd);
+        audio.play().catch(()=>resolve());
+      }catch(e){ resolve(); }
+    });
+  }
+
+  /* --------------- Landing: escolhe capa --------------- */
   const candidatos = [
     'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
     'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
-    'img/logosc.png' // fallback
+    'img/logosc.png'
   ];
-
   function tenta(src){
     return new Promise(resolve=>{
       const i = new Image();
       i.onload = ()=>resolve(src);
       i.onerror = ()=>resolve(null);
-      i.src = src + '?v=' + Date.now(); // evita cache travado
+      i.src = src + '?v=' + Date.now();
     });
   }
-
   (async function acharCapa(){
     let achou = null;
-    for (const src of candidatos){
-      achou = await tenta(src);
-      if (achou) break;
-    }
-    if (achou){
-      heroImg.src = achou;
-      heroImg.classList.remove('hidden');
-    } else {
-      hero.style.background = '#000';
-    }
+    for (const src of candidatos){ achou = await tenta(src); if (achou) break; }
+    if (achou){ heroImg.src = achou; heroImg.classList.remove('hidden'); }
+    else { hero.style.background = '#000'; }
   })();
 
   /* --------------- Navegação simples --------------- */
@@ -245,29 +259,12 @@
   const btnRanking = document.getElementById('btnRanking');
   const btnVoltar  = document.getElementById('btnVoltar');
 
-  const fxAbertura     = document.getElementById('fxAbertura');
-  const fxCerteza      = document.getElementById('fxCerteza');
-  const fxEntendeu     = document.getElementById('fxEntendeu');
-  const fxEstaCerto    = document.getElementById('fxEstaCerto');
-  const fxQualResposta = document.getElementById('fxQualResposta');
-  const fxCerta        = document.getElementById('fxCertaResposta');
-  const fxErrou        = document.getElementById('fxErrou');
-
-  const byId = id => document.getElementById(id);
-  const canPlay = a => { try { a.currentTime=0; a.play().catch(()=>{}); } catch(e){} };
-  const stop = a => { try { a.pause(); a.currentTime=0; } catch(e){} };
-
-  function stopAllFx(){
-    [fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou]
-      .forEach(stop);
-  }
   function hideAll(){
     secForm.style.display = 'none';
     secQuiz.style.display = 'none';
     secRank.style.display = 'none';
   }
 
-  // Ao clicar INICIAR: toca abertura até enviar dados
   btnStart.addEventListener('click', ()=>{
     canPlay(fxAbertura);
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
@@ -280,7 +277,6 @@
     }, 360);
   });
 
-  // Botão Ranking direto
   btnRanking.addEventListener('click', ()=>{
     stopAllFx();
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
@@ -318,49 +314,27 @@
     if(!n || !f){ alert('Preencha nome e telefone.'); return; }
     const ja = LS.get('respondidos', {});
     if(ja[f]){ alert('Este telefone já respondeu.'); return; }
-    // salva e segue para o quiz
     ja[f] = { nome:n, quando: Date.now() };
     LS.set('respondidos', ja);
     participanteAtual = { nome:n, fone:f, pontos:0 };
-
-    // PARA a música de abertura ao enviar os dados
-    stop(fxAbertura);
-
+    stop(fxAbertura); // para a abertura
     iniciarQuiz();
   });
 
   /* --------------- Quiz (uma por vez) --------------- */
   const perguntas = [
-    {
-      enunciado: "O que é fé genuína segundo o estudo?",
-      opcoes: [
-        "Fé baseada no testemunho de outras pessoas.",
-        "Fé emocional despertada em um culto.",
-        "Fé verdadeira e pessoal, que cresce com exercício.",
-        "Fé herdada de familiares."
-      ],
-      certa: 2
-    },
-    {
-      enunciado: "Qual foi o primeiro aspecto importante na vida de Abraão?",
-      opcoes: ["Obediência imediata","Caridade","Riqueza","Fama"],
-      certa: 0
-    },
-    {
-      enunciado: "A obediência, segundo a aula, é sobretudo…",
-      opcoes: [
-        "um ato de submissão cega.",
-        "uma expressão de amor e confiança em Deus.",
-        "uma tradição da igreja.",
-        "uma estratégia para evitar problemas."
-      ],
-      certa: 1
-    },
-    {
-      enunciado: "Qual é a característica primordial do cristão destacada na aula?",
-      opcoes: ["Popularidade","Prosperidade","Perseverança","Carisma"],
-      certa: 2
-    }
+    { enunciado:"O que é fé genuína segundo o estudo?",
+      opcoes:["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
+      certa:2 },
+    { enunciado:"Qual foi o primeiro aspecto importante na vida de Abraão?",
+      opcoes:["Obediência imediata","Caridade","Riqueza","Fama"],
+      certa:0 },
+    { enunciado:"A obediência, segundo a aula, é sobretudo…",
+      opcoes:["um ato de submissão cega.","uma expressão de amor e confiança em Deus.","uma tradição da igreja.","uma estratégia para evitar problemas."],
+      certa:1 },
+    { enunciado:"Qual é a característica primordial do cristão destacada na aula?",
+      opcoes:["Popularidade","Prosperidade","Perseverança","Carisma"],
+      certa:2 }
   ];
 
   let idx = 0, escolha = null;
@@ -390,7 +364,7 @@
     hideAll();
     secQuiz.style.display='block';
     idx = 0; escolha = null;
-    canPlay(fxEntendeu); // "Você entendeu a pergunta?"
+    canPlay(fxEntendeu);
     renderPergunta();
   }
 
@@ -412,27 +386,32 @@
     });
   }
 
-  // ENVIAR → esconde botões, mostra SÓ "Confirmar" e toca sequência
+  // Rodízio de áudios de confirmação (um por pergunta)
+  const confirmAudios = [fxCerteza, fxEstaCerto, fxQualResposta];
+
+  // ENVIAR → esconde botões, mostra SÓ "Confirmar" e toca UM áudio (rodízio)
   btnResp.addEventListener('click', ()=>{
-    if(escolha===null){ canPlay(fxCerteza); return; } // avisa que falta marcar
+    if(escolha===null){ canPlay(fxCerteza); return; }
     showConfirm();
-    // sequência: tem certeza? -> está certo disso? -> qual é a resposta certa?
-    canPlay(fxCerteza);
-    setTimeout(()=>canPlay(fxEstaCerto), 700);
-    setTimeout(()=>canPlay(fxQualResposta), 1400);
+    stopAllFx();
+    const qual = confirmAudios[idx % confirmAudios.length];
+    canPlay(qual);
   });
 
-  // CONFIRMAR → avalia
-  btnConf.addEventListener('click', ()=>{
+  // CONFIRMAR → avalia, toca acerto/erro e só depois avança
+  btnConf.addEventListener('click', async ()=>{
+    stopAllFx();
     const p = perguntas[idx];
     const ok = (escolha===p.certa);
-    if(ok){ participanteAtual.pontos++; canPlay(fxCerta); }
-    else  { canPlay(fxErrou); }
+
+    if(ok){ await playAndWait(fxCerta); }
+    else  { await playAndWait(fxErrou); }
 
     idx++; escolha=null;
 
     if(idx<perguntas.length){
-      setTimeout(()=>{ canPlay(fxEntendeu); renderPergunta(); }, 800);
+      renderPergunta();
+      canPlay(fxEntendeu); // só depois de carregar a próxima
     } else {
       finalizar();
     }
@@ -447,10 +426,8 @@
   function finalizar(){
     const rank = LS.get('ranking', []);
     rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: participanteAtual.pontos, quando: Date.now() });
-    // ordena: maior pontuação primeiro, empate pelo mais cedo
     rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
-
     hideAll();
     secRank.style.display='block';
     renderRanking();
@@ -477,9 +454,7 @@
       }
     });
   }
-
 })();
 </script>
 </body>
 </html>
-
