@@ -21,7 +21,6 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
-    a{color:inherit}
     img{display:block;max-width:100%}
     .hidden{display:none !important}
 
@@ -35,11 +34,11 @@
     }
     .brand, .right{pointer-events:auto; display:flex; align-items:center; gap:12px;}
     .brand img{height:22px; opacity:.95}
-    /* LOGO do jogo no topo direito */
-    .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45));}
+    /* Logo do jogo no topo direito (começa oculto) */
+    .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45)); display:none;}
     @media (max-width:768px){ .title-logo{height:22px;} }
 
-    /* -------------------- HERO (PRIMEIRA TELA) -------------------- */
+    /* -------------------- HERO -------------------- */
     #hero{
       position:relative;
       min-height:100svh;
@@ -48,29 +47,18 @@
       background:#000;
       overflow:hidden;
     }
-    #hero .bg{
-      position:absolute; inset:0; z-index:0;
-      display:grid; place-items:center;
-    }
+    #hero .bg{ position:absolute; inset:0; z-index:0; display:grid; place-items:center;}
     #heroImg{
       width:100%; height:100%;
-      object-fit:cover; /* desktop */
-      user-select:none; -webkit-user-drag:none;
-      filter:none;
+      object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none;
     }
-    /* ===== MOBILE: só “sobe” a arte, sem mudar tamanho ===== */
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
-      #heroImg{
-        object-fit:contain;
-        aspect-ratio:auto;
-        object-position: center 70px;
-      }
+      #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
     }
 
     #hero .cta{
-      position:relative; z-index:2;
-      width:100%; max-width: min(780px, 92vw);
+      position:relative; z-index:2; width:100%; max-width: min(780px, 92vw);
       display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
     }
     .btn{
@@ -82,14 +70,11 @@
       will-change: transform;
     }
     .btn:active{transform: translateY(1px); box-shadow: var(--shadow-soft);}
-    .btn.primary{
-      background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%);
-      color:#06261f;
-    }
+    .btn.primary{ background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%); color:#06261f; }
     .btn.secondary{ background:var(--white); color:#0a0d0c }
     .btn.full{ flex:1 1 320px; }
 
-    /* -------------------- CONTEÚDOS (form, quiz, ranking) -------------------- */
+    /* -------------------- CONTEÚDOS -------------------- */
     main{display:grid; gap:28px; padding:24px var(--pad) 48px; max-width:var(--maxw); margin:0 auto}
     .card{
       background:rgba(12,15,15,.72); backdrop-filter: blur(6px);
@@ -108,7 +93,6 @@
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .row .btn{min-width:180px}
 
-    /* Esconde as seções até acioná-las */
     #section-form, #section-quiz, #section-ranking{display:none}
 
     /* ------- Confirmação inline ------- */
@@ -118,11 +102,8 @@
     }
     .confirm-title{font-weight:800; margin-bottom:10px;}
 
-    /* ------- FX de feedback (visual) ------- */
-    #fxOverlay{
-      position:fixed; inset:0; pointer-events:none; z-index:60;
-    }
-    /* Acertou: halo verde que pulsa */
+    /* ------- FX visuais ------- */
+    #fxOverlay{ position:fixed; inset:0; pointer-events:none; z-index:60; }
     .fx-ok::after{
       content:""; position:absolute; inset:0; margin:auto;
       width:min(55vmin,520px); height:min(55vmin,520px);
@@ -130,15 +111,8 @@
       background:radial-gradient(ellipse at center, rgba(31,221,172,.28), rgba(31,221,172,0) 60%);
       animation:okPulse .95s ease-out forwards;
     }
-    @keyframes okPulse{
-      0%{transform:scale(.7); opacity:.0}
-      25%{opacity:.9}
-      100%{transform:scale(1.15); opacity:0}
-    }
-    /* Errou: shake + vermelho leve */
-    .fx-wrong{
-      animation:shake .6s ease-in-out 0s 1;
-    }
+    @keyframes okPulse{ 0%{transform:scale(.7); opacity:.0} 25%{opacity:.9} 100%{transform:scale(1.15); opacity:0} }
+    .fx-wrong{ animation:shake .6s ease-in-out 0s 1; }
     .fx-wrong::after{
       content:""; position:absolute; inset:0;
       background:radial-gradient(ellipse at center, rgba(242,78,58,.18), rgba(242,78,58,0) 65%);
@@ -146,10 +120,8 @@
     }
     @keyframes shake{
       0%,100%{transform:translateX(0)}
-      20%{transform:translateX(-10px)}
-      40%{transform:translateX(10px)}
-      60%{transform:translateX(-6px)}
-      80%{transform:translateX(6px)}
+      20%{transform:translateX(-10px)} 40%{transform:translateX(10px)}
+      60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
     }
     @keyframes fadeOut{ from{opacity:.9} to{opacity:0} }
   </style>
@@ -180,29 +152,22 @@
 
   <!-- CONTEÚDOS -->
   <main>
-
-    <!-- FORM PARTICIPANTE -->
     <section id="section-form" class="card">
       <h2>Dados do participante</h2>
       <label>Nome completo</label>
       <input id="nome" type="text" placeholder="Ex.: Maria Silva">
-
       <label>Telefone (com DDD)</label>
       <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
-
       <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
-
       <div class="row" style="margin-top:16px">
         <button id="btnEnviarDados" class="btn primary">Enviar</button>
       </div>
     </section>
 
-    <!-- QUIZ -->
     <section id="section-quiz" class="card">
       <h2 id="quizPergunta">Pergunta</h2>
       <div id="quizOpcoes"></div>
 
-      <!-- Confirmação inline (somente Confirmar) -->
       <div id="confirmBox" class="confirm-box hidden">
         <div class="confirm-title">Você tem certeza da resposta?</div>
         <div class="row">
@@ -224,7 +189,6 @@
       <audio id="fxAbertura"     src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
     </section>
 
-    <!-- RANKING -->
     <section id="section-ranking" class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <h2>Ranking</h2>
@@ -235,15 +199,13 @@
         <button id="btnVoltar" class="btn secondary">Voltar</button>
       </div>
     </section>
-
   </main>
 
-  <!-- Overlay de efeitos -->
   <div id="fxOverlay" aria-hidden="true"></div>
 
 <script>
 (function(){
-  /* --------------- Helpers --------------- */
+  /* ---------- refs ---------- */
   const hero = document.getElementById('hero');
   const heroImg = document.getElementById('heroImg');
   const crentaoLogo = document.getElementById('crentaoLogo');
@@ -261,7 +223,15 @@
   const stop = a => { try { a.pause(); a.currentTime=0; } catch(e){} };
   const stopAllFx = ()=>[fxAbertura,fxCerteza,fxEntendeu,fxEstaCerto,fxQualResposta,fxCerta,fxErrou].forEach(stop);
 
-  // Tocar e aguardar terminar (evita sobreposição)
+  const secForm = document.getElementById('section-form');
+  const secQuiz = document.getElementById('section-quiz');
+  const secRank = document.getElementById('section-ranking');
+
+  const btnStart   = document.getElementById('btnStart');
+  const btnRanking = document.getElementById('btnRanking');
+  const btnVoltar  = document.getElementById('btnVoltar');
+
+  /* ---------- helpers ---------- */
   function playAndWait(audio){
     return new Promise(resolve=>{
       try{
@@ -272,35 +242,36 @@
       }catch(e){ resolve(); }
     });
   }
-
-  // FX visual: 'ok' ou 'wrong'
   function showFx(type){
     return new Promise(resolve=>{
       const cls = type === 'ok' ? 'fx-ok' : 'fx-wrong';
       fxOverlay.classList.add(cls);
-      const timeout = setTimeout(()=>{
-        fxOverlay.classList.remove(cls);
-        clearTimeout(timeout);
-        resolve();
-      }, type === 'ok' ? 950 : 800);
+      setTimeout(()=>{ fxOverlay.classList.remove(cls); resolve(); }, type === 'ok' ? 950 : 800);
     });
   }
+  function testaImagem(src){
+    return new Promise(resolve=>{
+      const i = new Image();
+      i.onload = ()=>resolve(true);
+      i.onerror = ()=>resolve(false);
+      i.src = src + '?v=' + Date.now();
+    });
+  }
+  function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
+  function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
 
-  /* --------------- Logos/Capa (carregam com fallback) --------------- */
-  const logoCandidates = ['img/crentao-logo.png','img/show-crentao-logo.png','img/crentao.png'];
+  /* ---------- logo do topo (usa exatamente img/logosc.png) ---------- */
   (async function carregaLogo(){
-    for (const src of logoCandidates){
-      const ok = await testaImagem(src);
-      if (ok){ crentaoLogo.src = src; return; }
-    }
-    // se nada deu certo, esconde
-    crentaoLogo.style.display = 'none';
+    const path = 'img/logosc.png';
+    const ok = await testaImagem(path);
+    if (ok) crentaoLogo.src = path;
+    // começa oculto; mostramos no quiz/ranking
   })();
 
+  /* ---------- capa do hero ---------- */
   const capaCandidates = [
     'img/cover.png','img/cover.jpg','img/cover.webp','img/capa.png','img/capa.jpg',
-    'img/show-crentao-bg.png','img/show-crentao-bg.jpg',
-    'img/logosc.png'
+    'img/show-crentao-bg.png','img/show-crentao-bg.jpg','img/logosc.png'
   ];
   (async function acharCapa(){
     for (const src of capaCandidates){
@@ -310,40 +281,13 @@
     hero.style.background = '#000';
   })();
 
-  function testaImagem(src){
-    return new Promise(resolve=>{
-      const i = new Image();
-      i.onload = ()=>resolve(true);
-      i.onerror = ()=>resolve(false);
-      i.src = src + '?v=' + Date.now();
-    });
-  }
-
-  /* --------------- Navegação simples --------------- */
-  const secForm = document.getElementById('section-form');
-  const secQuiz = document.getElementById('section-quiz');
-  const secRank = document.getElementById('section-ranking');
-
-  const btnStart   = document.getElementById('btnStart');
-  const btnRanking = document.getElementById('btnRanking');
-  const btnVoltar  = document.getElementById('btnVoltar');
-
-  function hideAll(){
-    secForm.style.display = 'none';
-    secQuiz.style.display = 'none';
-    secRank.style.display = 'none';
-  }
-
+  /* ---------- navegação ---------- */
   btnStart.addEventListener('click', ()=>{
     canPlay(fxAbertura);
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
     hero.style.transform  = 'translateY(-8px)';
     hero.style.opacity    = '0';
-    setTimeout(()=>{
-      hero.style.display='none';
-      hideAll();
-      secForm.style.display='block';
-    }, 360);
+    setTimeout(()=>{ hero.style.display='none'; hideAll(); toggleLogo(false); secForm.style.display='block'; }, 360);
   });
 
   btnRanking.addEventListener('click', ()=>{
@@ -351,20 +295,12 @@
     hero.style.transition = 'transform .35s ease, opacity .35s ease';
     hero.style.transform  = 'translateY(-8px)';
     hero.style.opacity    = '0';
-    setTimeout(()=>{
-      hero.style.display='none';
-      hideAll();
-      secRank.style.display='block';
-      renderRanking();
-    }, 360);
+    setTimeout(()=>{ hero.style.display='none'; hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking(); }, 360);
   });
 
-  btnVoltar.addEventListener('click', ()=>{
-    hideAll();
-    secForm.style.display='block';
-  });
+  btnVoltar.addEventListener('click', ()=>{ hideAll(); toggleLogo(false); secForm.style.display='block'; });
 
-  /* --------------- Form + bloqueio 1x por telefone --------------- */
+  /* ---------- storage + form ---------- */
   const nome = document.getElementById('nome');
   const fone = document.getElementById('fone');
   const btnEnviarDados = document.getElementById('btnEnviarDados');
@@ -385,12 +321,12 @@
     if(ja[f]){ alert('Este telefone já respondeu.'); return; }
     ja[f] = { nome:n, quando: Date.now() };
     LS.set('respondidos', ja);
-    participanteAtual = { nome:n, fone:f, pontos:0 };
-    stop(fxAbertura); // para a abertura
+    participanteAtual = { nome:n, fone:f };
+    stop(fxAbertura);
     iniciarQuiz();
   });
 
-  /* --------------- Quiz (uma por vez) --------------- */
+  /* ---------- quiz ---------- */
   const perguntas = [
     { enunciado:"O que é fé genuína segundo o estudo?",
       opcoes:["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
@@ -406,7 +342,7 @@
       certa:2 }
   ];
 
-  let idx = 0, escolha = null;
+  let idx = 0, escolha = null, acertos = 0;
 
   const elPerg     = document.getElementById('quizPergunta');
   const elOps      = document.getElementById('quizOpcoes');
@@ -416,23 +352,12 @@
   const confirmBox = document.getElementById('confirmBox');
   const btnConf    = document.getElementById('btnConfirmar');
 
-  function showActions(){
-    actionRow.classList.remove('hidden');
-    btnResp.classList.remove('hidden');
-    btnLimpar.classList.remove('hidden');
-    confirmBox.classList.add('hidden');
-  }
-  function showConfirm(){
-    actionRow.classList.add('hidden');
-    btnResp.classList.add('hidden');
-    btnLimpar.classList.add('hidden');
-    confirmBox.classList.remove('hidden');
-  }
+  function showActions(){ actionRow.classList.remove('hidden'); confirmBox.classList.add('hidden'); }
+  function showConfirm(){ actionRow.classList.add('hidden'); confirmBox.classList.remove('hidden'); }
 
   function iniciarQuiz(){
-    hideAll();
-    secQuiz.style.display='block';
-    idx = 0; escolha = null;
+    hideAll(); secQuiz.style.display='block'; toggleLogo(true);
+    idx = 0; escolha = null; acertos = 0;
     canPlay(fxEntendeu);
     renderPergunta();
   }
@@ -440,53 +365,34 @@
   function renderPergunta(){
     const p = perguntas[idx];
     elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
-    elOps.innerHTML = '';
-    showActions();
-
+    elOps.innerHTML = ''; showActions();
     p.opcoes.forEach((txt,i)=>{
-      const id = `op${idx}_${i}`;
       const li = document.createElement('label');
-      li.style.display='flex'; li.style.gap='10px'; li.style.alignItems='center'; li.style.margin='10px 0';
-      li.innerHTML = `<input type="radio" name="op" id="${id}" value="${i}" /> <span>${txt}</span>`;
+      li.style.cssText='display:flex;gap:10px;align-items:center;margin:10px 0';
+      li.innerHTML = `<input type="radio" name="op" value="${i}" /> <span>${txt}</span>`;
       elOps.appendChild(li);
     });
-    elOps.querySelectorAll('input[name=op]').forEach(r=>{
-      r.addEventListener('change', ()=>{ escolha = +r.value; });
-    });
+    elOps.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{ escolha=+r.value; }));
   }
 
-  // Rodízio de áudios de confirmação (um por pergunta)
+  // rodízio de áudios
   const confirmAudios = [fxCerteza, fxEstaCerto, fxQualResposta];
 
-  // ENVIAR → esconde botões, mostra SÓ "Confirmar" e toca UM áudio (rodízio)
   btnResp.addEventListener('click', ()=>{
     if(escolha===null){ canPlay(fxCerteza); return; }
-    showConfirm();
-    stopAllFx();
-    const qual = confirmAudios[idx % confirmAudios.length];
-    canPlay(qual);
+    showConfirm(); stopAllFx();
+    canPlay( confirmAudios[idx % confirmAudios.length] );
   });
 
-  // CONFIRMAR → avalia, toca acerto/erro e mostra FX visual; só depois avança
   btnConf.addEventListener('click', async ()=>{
     stopAllFx();
-    const p = perguntas[idx];
-    const ok = (escolha===p.certa);
-
-    if(ok){
-      await Promise.all([ playAndWait(fxCerta), showFx('ok') ]);
-    }else{
-      await Promise.all([ playAndWait(fxErrou), showFx('wrong') ]);
-    }
+    const ok = (escolha === perguntas[idx].certa);
+    if(ok){ acertos++; await Promise.all([playAndWait(fxCerta), showFx('ok')]); }
+    else  { await Promise.all([playAndWait(fxErrou),  showFx('wrong')]); }
 
     idx++; escolha=null;
-
-    if(idx<perguntas.length){
-      renderPergunta();
-      canPlay(fxEntendeu); // só depois de carregar a próxima
-    } else {
-      finalizar();
-    }
+    if(idx < perguntas.length){ renderPergunta(); canPlay(fxEntendeu); }
+    else { finalizar(); }
   });
 
   btnLimpar.addEventListener('click', ()=>{
@@ -494,17 +400,14 @@
     escolha=null;
   });
 
-  /* --------------- Finalização + Ranking --------------- */
+  /* ---------- ranking ---------- */
   function finalizar(){
     const rank = LS.get('ranking', []);
-    rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: participanteAtual.pontos, quando: Date.now() });
+    rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: Number(acertos)||0, quando: Date.now() });
     rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
-    hideAll();
-    secRank.style.display='block';
-    renderRanking();
+    hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking();
   }
-
   function renderRanking(){
     const rank = LS.get('ranking', []);
     const box = document.getElementById('rankingLista');
@@ -513,15 +416,13 @@
     box.innerHTML = linhas.map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join('');
   }
 
-  /* --------------- Modo DEV: reset do ranking (oculto) --------------- */
+  /* ---------- DEV reset ---------- */
   const btnResetDev = document.getElementById('btnResetDev');
   if (location.hash === '#dev') {
     btnResetDev.classList.remove('hidden');
     btnResetDev.addEventListener('click', ()=>{
       if (confirm('Apagar todos os resultados do ranking neste navegador?')) {
-        LS.del('ranking');
-        LS.del('respondidos');
-        renderRanking();
+        LS.del('ranking'); LS.del('respondidos'); renderRanking();
         alert('Ranking limpo (apenas neste navegador).');
       }
     });
