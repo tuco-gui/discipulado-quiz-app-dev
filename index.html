@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Show do Crentão — Sobrenatural Church</title>
   <meta name="color-scheme" content="dark">
+
   <style>
     :root{
       --bg:#000; --text:#fff; --muted:#cbd5e1;
@@ -20,66 +21,47 @@
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
-    /* ====== FUNDO (só na landing) ====== */
-    body.landing-active{overflow:hidden} /* evita scroll na primeira tela */
+    /* ====== LANDING (capa) ====== */
+    body.landing-active{overflow:hidden}
 
-    body.landing-active::before{
-      content:""; position:fixed; inset:0; z-index:-2;
-      background:
-        /* leve realce (sem escurecer demais) */
-        linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.12)),
-        url("img/cover.png") center / cover no-repeat;
-      will-change: transform;
-      transform-origin: 50% 30%;
-      /* desktop/tablet: tamanho normal */
-      transform: scale(1);
-    }
-
-    /* ----- MOBILE: reduzir a arte para caber inteira ----- */
-    /* telefones em retrato “comuns” */
-    @media (max-aspect-ratio: 3/4){
-      :root{ --landing-pad-bottom: calc(18vh + env(safe-area-inset-bottom, 0px)); }
-      body.landing-active::before{
-        background-position: center 42%;
-        transform: scale(.80);       /* << redução principal */
-      }
-    }
-    /* telefones mais estreitos/altos (ex.: iPhones novos) */
-    @media (max-width: 480px) and (max-aspect-ratio: 10/16){
-      :root{ --landing-pad-bottom: calc(21vh + env(safe-area-inset-bottom, 0px)); }
-      body.landing-active::before{
-        background-position: center 44%;
-        transform: scale(.74);       /* << redução extra para garantir que o logo caiba 100% */
-      }
-    }
-    /* aparelhos muito compactos (extra seguro) */
-    @media (max-width: 380px) and (max-aspect-ratio: 10/19){
-      :root{ --landing-pad-bottom: calc(23vh + env(safe-area-inset-bottom, 0px)); }
-      body.landing-active::before{
-        background-position: center 46%;
-        transform: scale(.70);       /* << cabe inteiro sem estourar */
-      }
-    }
-
-    /* ====== LANDING: só os dois botões sobre a imagem ====== */
     .landing{
       position:fixed; inset:0; z-index:3;
-      min-height: 100svh; /* iOS/Android novos */
-      min-height: 100dvh; /* novos padrões */
-      min-height: 100vh;  /* fallback */
+      min-height: 100svh; min-height: 100dvh; min-height: 100vh;
       display:flex; align-items:flex-end; justify-content:center;
       padding: 0 16px var(--landing-pad-bottom);
       transition:opacity .45s ease, transform .45s ease;
+      background:#000;              /* fundo puro preto */
     }
     .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
 
+    /* A IMAGEM AGORA É UM <img>, NÃO BACKGROUND */
+    .landing-bg{
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:100vw; height:100vh; z-index:2; pointer-events:none;
+      object-fit:cover;            /* desktop/tablet = preenche a tela */
+      object-position:center;
+      filter:none;                 /* sem escurecer a arte */
+    }
+
+    /* MOBILE: mostrar a imagem INTEIRA, sem cortar (contain) */
+    @media (max-width: 768px){
+      :root{ --landing-pad-bottom: calc(18vh + env(safe-area-inset-bottom, 0px)); }
+      .landing-bg{
+        object-fit:contain;        /* <<< chave para não cortar no celular */
+        background:#000;           /* barras pretas ao redor, se necessário */
+      }
+    }
+    /* mobile ainda mais estreito — sobe ainda mais os botões */
+    @media (max-width: 420px){
+      :root{ --landing-pad-bottom: calc(21vh + env(safe-area-inset-bottom, 0px)); }
+    }
+
     .cta{
+      position:relative; z-index:3;         /* acima da imagem */
       width: min(920px, 100%);
       display:grid; gap:18px; grid-template-columns:1fr 1fr;
     }
-    @media (max-width:720px){
-      .cta{ grid-template-columns: 1fr; gap:14px; }
-    }
+    @media (max-width:720px){ .cta{ grid-template-columns:1fr; gap:14px; } }
 
     .btn{
       appearance:none;border:0;cursor:pointer;border-radius:12px;
@@ -94,18 +76,16 @@
       box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
       border:1px solid #10d49f
     }
-    .btn.start:hover{filter:saturate(1.15) brightness(1.02)}
     .btn.start:active{transform:translateY(1px)}
     .btn.rank{
       color:var(--ink); background:var(--white);
       border:1px solid #dfe7e4; box-shadow:0 6px 16px rgba(255,255,255,.08)
     }
-    .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
     .btn.rank:active{transform:translateY(1px)}
 
-    /* ====== APP ====== */
+    /* ====== APP (depois que entra) ====== */
     header.appbar{
-      position:sticky; top:0; z-index:2; padding:10px 16px;
+      position:sticky; top:0; z-index:4; padding:10px 16px;
       border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
       display:none; align-items:center; justify-content:space-between; gap:12px;
     }
@@ -113,7 +93,7 @@
     .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.12))}
     .brand-right img{height:44px;object-fit:contain}
 
-    main{max-width:1100px;margin:12px auto 64px;padding:18px 16px}
+    main{max-width:1100px;margin:12px auto 64px;padding:18px 16px; position:relative; z-index:1;}
     .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
@@ -141,13 +121,8 @@
   </style>
 </head>
 <body class="landing-active">
-  <!-- APPBAR (aparece após clicar Iniciar/Ranking) -->
-  <header class="appbar">
-    <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
-    <div class="brand-right"><img src="img/logosc.png" alt="Show do Crentão" /></div>
-  </header>
-
-  <!-- LANDING -->
+  <!-- LANDING: imagem de capa e botões -->
+  <img src="img/cover.png" alt="Show do Crentão" class="landing-bg" />
   <section id="landing" class="landing">
     <div class="cta">
       <button id="goParticipar" class="btn start">Iniciar</button>
@@ -155,6 +130,13 @@
     </div>
   </section>
 
+  <!-- APPBAR (aparece após entrar) -->
+  <header class="appbar">
+    <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
+    <div class="brand-right"><img src="img/logosc.png" alt="Show do Crentão" /></div>
+  </header>
+
+  <!-- CONTEÚDO -->
   <main>
     <!-- CADASTRO -->
     <section id="screen-register" class="card grid hidden">
@@ -204,7 +186,7 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v11-landing-mobile-scale'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v12-landing-mobile-contain'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -240,7 +222,8 @@
       const all=loadAll();
       if(all.submissions.some(s=>s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw))
         return setMsg(box,'Você já respondeu este quiz e não pode responder novamente.','error');
-      stopIntro(); // para música ao enviar
+      /* parar música AO ENVIAR os dados do participante */
+      stopIntro();
       sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
       quizState.index=0; quizState.correct=0; quizState.selected=null;
       renderCurrentQuestion(); show('screen-quiz'); window.scrollTo({top:0, behavior:'instant'});
