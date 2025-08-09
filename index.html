@@ -235,15 +235,17 @@
   }
   function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
   function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
+
   function goHome(){
-    // volta para a capa
+    // volta para a capa com CTA no lugar certo
     hideAll();
     stopAllFx();
     toggleLogo(false);
     hero.style.display='block';
-    // reseta efeito de fade usado na transição
     hero.style.opacity='1';
     hero.style.transform='none';
+    // >>> garante que a CTA apareça embaixo (topo da página)
+    window.scrollTo(0, 0);
   }
 
   /* ---------- logo do topo (usa exatamente img/logosc.png) ---------- */
@@ -283,7 +285,7 @@
     setTimeout(()=>{ hero.style.display='none'; hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking(); }, 360);
   });
 
-  // agora volta pra HOME/capa
+  // volta para a HOME/capa
   btnVoltar.addEventListener('click', goHome);
 
   /* ---------- storage + form ---------- */
@@ -363,7 +365,6 @@
     elOps.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{ escolha=+r.value; }));
   }
 
-  // rodízio de áudios
   const confirmAudios = [fxCerteza, fxEstaCerto, fxQualResposta];
 
   btnResp.addEventListener('click', ()=>{
