@@ -16,39 +16,63 @@
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
-    /* FUNDO = aparece SOMENTE na landing */
+    /* ====== FUNDO (só na landing) ====== */
     body.landing-active::before{
       content:""; position:fixed; inset:0; z-index:-2;
-      /* bem mais leve – cores vivas! */
+      /* Foco: responsividade no mobile */
       background:
         linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.35)),
-        url("img/cover.png") center/cover no-repeat;
+        url("img/cover.png") center / cover no-repeat;
+    }
+    /* Em telas altas e estreitas (retrato), desce um pouco o foco da arte
+       para não cortar o topo. Ajuste leve no eixo Y */
+    @media (max-aspect-ratio: 3/4){
+      body.landing-active::before{
+        background-position: center 38%;
+      }
     }
 
-    /* ====== LANDING: apenas os 2 botões, sobre a imagem ====== */
+    /* ====== LANDING: só os dois botões sobre a imagem ====== */
     .landing{
       position:fixed; inset:0; z-index:3;
+      /* Usa viewport seguro do iOS e fallback */
+      min-height: 100svh;           /* iOS/Android novos */
+      min-height: 100dvh;           /* fallback novo */
+      min-height: 100vh;            /* fallback geral   */
       display:flex; align-items:flex-end; justify-content:center;
-      padding:0 16px 8vh;
+      padding: 0 16px calc(12vh + env(safe-area-inset-bottom, 0px));
       transition:opacity .45s ease, transform .45s ease;
     }
     .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
 
-    .cta{ width:min(920px,100%); display:grid; gap:18px; grid-template-columns:1fr 1fr; }
-    @media (max-width:720px){ .cta{ grid-template-columns:1fr; } }
+    .cta{
+      width: min(920px, 100%);
+      display:grid; gap:18px; grid-template-columns:1fr 1fr;
+    }
+    @media (max-width:720px){
+      .cta{ grid-template-columns: 1fr; gap:14px; }
+    }
 
     .btn{
-      appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
+      appearance:none;border:0;cursor:pointer;border-radius:12px;
       font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
-      font-size:clamp(1rem,0.6rem + 1.4vw,1.6rem);
+      /* Botões fluidos (altura e fonte reagem à tela) */
+      padding: clamp(14px, 3.8vw, 18px) clamp(16px, 4vw, 20px);
+      font-size: clamp(1rem, 3.6vw, 1.4rem);
       transition:transform .06s ease, box-shadow .2s ease, filter .2s;
     }
-    .btn.start{color:#02110c;background:linear-gradient(180deg,var(--green),var(--green-deep));
+    .btn.start{
+      color:#02110c;
+      background:linear-gradient(180deg,var(--green),var(--green-deep));
       box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
-      border:1px solid #10d49f}
+      border:1px solid #10d49f
+    }
     .btn.start:hover{filter:saturate(1.15) brightness(1.02)}
     .btn.start:active{transform:translateY(1px)}
-    .btn.rank{color:var(--ink);background:var(--white);border:1px solid #dfe7e4;box-shadow:0 6px 16px rgba(255,255,255,.08)}
+    .btn.rank{
+      color:var(--ink); background:var(--white);
+      border:1px solid #dfe7e4; box-shadow:0 6px 16px rgba(255,255,255,.08)
+    }
     .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
     .btn.rank:active{transform:translateY(1px)}
 
@@ -96,7 +120,7 @@
     <div class="brand-right"><img src="img/logosc.png" alt="Show do Crentão" /></div>
   </header>
 
-  <!-- LANDING: apenas os dois botões -->
+  <!-- LANDING -->
   <section id="landing" class="landing">
     <div class="cta">
       <button id="goParticipar" class="btn start">Iniciar</button>
@@ -153,7 +177,7 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v8-landing-viva-logo-right'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v9-landing-responsiva'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -167,12 +191,11 @@
     const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
     const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
 
-    /* Entrar no app: some landing e remove o fundo da primeira tela */
     function enterApp(next){
       const landing=$('landing');
       landing.classList.add('hide');
-      document.body.classList.remove('landing-active');   // tira a imagem de fundo
-      document.body.classList.add('app-started');         // mostra a appbar
+      document.body.classList.remove('landing-active');
+      document.body.classList.add('app-started');
       setTimeout(()=>{ landing.style.display='none'; window.scrollTo({top:0, behavior:'instant'}); next(); }, 460);
     }
 
