@@ -12,53 +12,46 @@
       --green:#1bd39b; --green-deep:#12b37f;
       --white:#ffffff; --ink:#0b0f12;
       --panel:#050a0a; --panel-2:#071313; --border:#0c1f1d;
-
-      /* distância dos botões à base na landing */
       --landing-pad-bottom: calc(12vh + env(safe-area-inset-bottom, 0px));
     }
-
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+    a{color:inherit}
 
-    /* ====== LANDING (capa) ====== */
+    /* Landing */
     body.landing-active{overflow:hidden}
-
     .landing{
       position:fixed; inset:0; z-index:3;
-      min-height: 100svh; min-height: 100dvh; min-height: 100vh;
-      display:flex; align-items:flex-end; justify-content:center;
-      padding: 0 16px var(--landing-pad-bottom);
+      min-height:100svh; display:flex; align-items:flex-end; justify-content:center;
+      padding:0 16px var(--landing-pad-bottom);
       transition:opacity .45s ease, transform .45s ease;
-      background:#000;              /* fundo puro preto */
+      background:#000;
     }
     .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
 
-    /* A IMAGEM AGORA É UM <img>, NÃO BACKGROUND */
+    /* Imagem de capa como <img>, por baixo */
     .landing-bg{
       position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
       width:100vw; height:100vh; z-index:2; pointer-events:none;
-      object-fit:cover;            /* desktop/tablet = preenche a tela */
-      object-position:center;
-      filter:none;                 /* sem escurecer a arte */
+      object-fit:cover; object-position:center;
+      filter:none; display:none; /* fica display:none até carregar */
+      background:#000;
     }
+    .landing-bg.show{display:block}
 
-    /* MOBILE: mostrar a imagem INTEIRA, sem cortar (contain) */
+    /* Mobile: mostra a imagem INTEIRA, sem cortar */
     @media (max-width: 768px){
       :root{ --landing-pad-bottom: calc(18vh + env(safe-area-inset-bottom, 0px)); }
-      .landing-bg{
-        object-fit:contain;        /* <<< chave para não cortar no celular */
-        background:#000;           /* barras pretas ao redor, se necessário */
-      }
+      .landing-bg{ object-fit:contain; }
     }
-    /* mobile ainda mais estreito — sobe ainda mais os botões */
     @media (max-width: 420px){
       :root{ --landing-pad-bottom: calc(21vh + env(safe-area-inset-bottom, 0px)); }
     }
 
     .cta{
-      position:relative; z-index:3;         /* acima da imagem */
-      width: min(920px, 100%);
+      position:relative; z-index:3;
+      width:min(920px,100%);
       display:grid; gap:18px; grid-template-columns:1fr 1fr;
     }
     @media (max-width:720px){ .cta{ grid-template-columns:1fr; gap:14px; } }
@@ -68,7 +61,7 @@
       font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
       padding: clamp(14px, 3.8vw, 18px) clamp(16px, 4vw, 20px);
       font-size: clamp(1rem, 3.6vw, 1.4rem);
-      transition:transform .06s ease, box-shadow .2s ease, filter .2s;
+      transition:transform .06s ease, box-shadow .2s ease;
     }
     .btn.start{
       color:#02110c;
@@ -83,7 +76,7 @@
     }
     .btn.rank:active{transform:translateY(1px)}
 
-    /* ====== APP (depois que entra) ====== */
+    /* App */
     header.appbar{
       position:sticky; top:0; z-index:4; padding:10px 16px;
       border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
@@ -118,11 +111,22 @@
     .rank-item{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #0c1f1d;border-radius:12px;background:#071313}
     .rank-pos{width:42px;height:42px;display:grid;place-items:center;background:#081716;border-radius:10px;border:1px solid #0f2a26}
     .score{font-weight:900}
+
+    /* Aviso se não encontrar a capa (só pra você) */
+    .cover-hint{
+      position:fixed; inset:auto 8px 8px auto; z-index:5;
+      background:#111a; color:#fff; padding:8px 10px; border-radius:8px; font-size:12px;
+      border:1px solid #2b2b2b; display:none;
+    }
+    .cover-hint.show{display:block}
   </style>
 </head>
 <body class="landing-active">
-  <!-- LANDING: imagem de capa e botões -->
-  <img src="img/cover.png" alt="Show do Crentão" class="landing-bg" />
+
+  <!-- IMG da capa (mostra quando carregar) -->
+  <img id="coverImg" class="landing-bg" alt="Show do Crentão">
+
+  <!-- Landing com botões -->
   <section id="landing" class="landing">
     <div class="cta">
       <button id="goParticipar" class="btn start">Iniciar</button>
@@ -130,15 +134,17 @@
     </div>
   </section>
 
-  <!-- APPBAR (aparece após entrar) -->
+  <!-- Aviso de arquivo não encontrado (diagnóstico) -->
+  <div id="coverHint" class="cover-hint">⚠️ Coloque a imagem da capa em <code>img/cover.png</code> (ou <code>cover.jpg</code>/<code>cover.webp</code>/<code>capa.png</code>/<code>capa.jpg</code>).</div>
+
+  <!-- Appbar (após entrar) -->
   <header class="appbar">
     <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
     <div class="brand-right"><img src="img/logosc.png" alt="Show do Crentão" /></div>
   </header>
 
-  <!-- CONTEÚDO -->
+  <!-- Conteúdo -->
   <main>
-    <!-- CADASTRO -->
     <section id="screen-register" class="card grid hidden">
       <h2>Dados do participante</h2>
       <div><label for="nome">Nome completo</label><input id="nome" type="text" placeholder="Ex.: Maria Silva" autocomplete="name"></div>
@@ -148,13 +154,11 @@
       <div id="msgRegister" class="notice hidden"></div>
     </section>
 
-    <!-- QUIZ -->
     <section id="screen-quiz" class="card grid hidden">
       <div class="grid" id="quizStep"></div>
       <div id="quizMsg" class="notice hidden"></div>
     </section>
 
-    <!-- RESULTADO -->
     <section id="screen-result" class="card grid hidden center">
       <h2>Resultado</h2>
       <p id="resultText" class="muted"></p>
@@ -164,7 +168,6 @@
       </div>
     </section>
 
-    <!-- RANKING -->
     <section id="screen-ranking" class="card grid hidden">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
         <h2 style="margin:0;">Ranking</h2>
@@ -175,7 +178,7 @@
     </section>
   </main>
 
-  <!-- ÁUDIOS -->
+  <!-- Áudios -->
   <audio id="sfx-intro"        src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
   <audio id="sfx-pergunta"     src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3"   preload="auto"></audio>
   <audio id="sfx-certeza"      src="audio/silvio-santos-voce-tem-certeza.mp3"           preload="auto"></audio>
@@ -185,17 +188,35 @@
   <audio id="sfx-errou"        src="audio/faustao-errou.mp3"                             preload="auto"></audio>
 
   <script>
-    /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v12-landing-mobile-contain'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    /* ===== COVER AUTO-DETECT ===== */
+    const coverCandidates = [
+      'img/cover.png','img/cover.jpg','img/cover.webp',
+      'img/capa.png','img/capa.jpg'
+    ];
+    const coverImg = document.getElementById('coverImg');
+    const coverHint = document.getElementById('coverHint');
+
+    function tryLoadCover(list, idx=0){
+      if(idx>=list.length){ coverHint.classList.add('show'); return; }
+      const url=list[idx];
+      const test=new Image();
+      test.onload = ()=>{ coverImg.src=url; coverImg.classList.add('show'); };
+      test.onerror= ()=> tryLoadCover(list, idx+1);
+      test.src=url;
+    }
+    tryLoadCover(coverCandidates);
+
+    /* ===== BASE / STORAGE / UI ===== */
+    const QUIZ_VERSION='v13-cover-autodetect'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
     const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+
     function loadAll(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):{submissions:[]}; }catch(e){ return {submissions:[]};}
     function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
     function show(id){ ['screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
 
-    /* ÁUDIO INTRO */
     const intro=$('sfx-intro');
     const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
     const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
@@ -214,7 +235,7 @@
     function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
     function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
 
-    /* CADASTRO */
+    /* Cadastro */
     $('btnSendRegister').addEventListener('click', ()=>{
       const name=titleCase(($('nome').value||'')); const phoneRaw=normPhone(($('fone').value||'')); const box=$('msgRegister'); clearMsg(box);
       if(!name||name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
@@ -222,14 +243,13 @@
       const all=loadAll();
       if(all.submissions.some(s=>s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw))
         return setMsg(box,'Você já respondeu este quiz e não pode responder novamente.','error');
-      /* parar música AO ENVIAR os dados do participante */
-      stopIntro();
+      stopIntro(); /* para música ao enviar cadastro */
       sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
       quizState.index=0; quizState.correct=0; quizState.selected=null;
       renderCurrentQuestion(); show('screen-quiz'); window.scrollTo({top:0, behavior:'instant'});
     });
 
-    /* QUIZ */
+    /* Quiz */
     const QUESTIONS=[
       {title:"O que caracteriza a obediência imediata?",
        options:["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],correctIndex:1},
@@ -298,7 +318,7 @@
       show('screen-result'); sessionStorage.removeItem('quiz_participant'); window.scrollTo({top:0, behavior:'instant'});
     }
 
-    /* RANKING */
+    /* Ranking */
     function renderRanking(){
       const list=document.getElementById('rankList'); const count=document.getElementById('rankCount');
       const data=[...loadAll().submissions];
