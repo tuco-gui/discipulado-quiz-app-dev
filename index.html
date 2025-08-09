@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -8,20 +8,64 @@
   <style>
     :root{ --bg:#000; --text:#fff; --muted:#cbd5e1; --ok:#22c55e; --error:#ef4444; }
     *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;line-height:1.45}
-    header{padding:22px 16px 8px;text-align:center;border-bottom:1px solid #0b0b0b;background:linear-gradient(180deg,#070707,#000)}
-    .brand{display:inline-flex;gap:14px;align-items:center;justify-content:center}
-    .logo-full{height:44px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.15));}
-    h1{margin:4px 0 0;font-size:clamp(1.2rem,1rem + 1.4vw,2rem);letter-spacing:.02em}
-    .sub{color:var(--muted);font-size:.95rem}
-    main{max-width:860px;margin:18px auto 64px;padding:0 16px}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;line-height:1.45;min-height:100%}
+
+    /* ====== BACKGROUND / CAPA ====== */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(1200px 600px at 50% 0%, rgba(0,255,200,.12), transparent 60%),
+        radial-gradient(900px 500px at 100% 100%, rgba(0,160,255,.10), transparent 60%),
+        radial-gradient(900px 500px at 0% 100%, rgba(0,255,140,.08), transparent 60%),
+        #000;
+      background-size:cover;
+      z-index:-2;
+    }
+    body.has-cover::before{
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.8)),
+        url("img/cover.png") center/cover no-repeat;
+    }
+
+    /* ====== HEADER DEPOIS DA ANIMAÇÃO ====== */
+    header.appbar{
+      position:sticky; top:0; z-index:5;
+      padding:10px 16px; border-bottom:1px solid #0b0b0b;
+      background:rgba(0,0,0,.55); backdrop-filter: blur(6px);
+      display:none; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .app-started header.appbar{ display:flex; }
+    .brand-left{display:flex; align-items:center; gap:10px}
+    .brand-left img{height:34px; object-fit:contain; filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
+    .brand-right{font-weight:900; letter-spacing:.02em}
+
+    main{max-width:980px;margin:0 auto 64px;padding:18px 16px}
+
+    /* ====== PAINEL / HERO ====== */
+    .hero{
+      margin:28px auto 24px;
+      max-width:820px;
+      background:rgba(0,0,0,.72);
+      border:1px solid #101010; border-radius:20px;
+      box-shadow:0 10px 35px rgba(0,0,0,.65);
+      padding:28px;
+      display:grid; gap:12px; justify-items:center; text-align:center;
+      transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s ease;
+    }
+    .hero h1{margin:8px 0 0; font-size:clamp(1.6rem,1.2rem + 2vw,2.6rem);}
+    .hero .sub{color:var(--muted)}
+    .hero .actions{display:grid; gap:12px; grid-template-columns:1fr 1fr; width:min(560px,100%)}
+
+    .btn{appearance:none;border:0;background:#fff;color:#000;padding:14px 16px;border-radius:12px;font-weight:900;cursor:pointer}
+    .btn.ghost{background:transparent;color:#fff;border:1px solid #222}
+
+    /* ====== TELAS ====== */
     .card{border:1px solid #111;border-radius:16px;background:#050505;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
     @media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr}}
-    .btn{appearance:none;border:0;background:#fff;color:#000;padding:12px 16px;border-radius:12px;font-weight:900;cursor:pointer}
-    .btn.ghost{background:transparent;color:#fff;border:1px solid #222}
-    .btn.row{width:100%;text-align:center}
+    .hidden{display:none !important}
     label{font-weight:800;display:block;margin:8px 0 6px}
     input[type="text"],input[type="tel"]{width:100%;background:#0a0a0a;color:#fff;border:1px solid #222;border-radius:12px;padding:12px 14px;outline:none}
     input[type="text"]:focus,input[type="tel"]:focus{border-color:#444}
@@ -31,7 +75,6 @@
     .notice{padding:10px;border:1px solid #151515;border-radius:12px;background:#0a0a0a;margin-top:10px}
     .muted{color:var(--muted)}
     .center{text-align:center}
-    .hidden{display:none !important}
     .feedback{display:grid;place-items:center;min-height:110px;border:1px dashed #222;border-radius:12px;background:#0b0b0b}
     .feedback.ok{border-color:#14532d;background:#052e16}
     .feedback.error{border-color:#7f1d1d;background:#2a1212}
@@ -42,28 +85,32 @@
     .rank-item{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #151515;border-radius:12px;background:#080808}
     .rank-pos{width:42px;height:42px;display:grid;place-items:center;background:#0a0a0a;border-radius:10px;border:1px solid #1c1c1c}
     .score{font-weight:900}
+
+    /* ====== ESTADOS DE ANIMAÇÃO ====== */
+    .hero.hide-out{opacity:0; transform:translateY(-18px) scale(.98); pointer-events:none}
+    .app-started .hero{display:none}
   </style>
 </head>
-<body>
-  <header>
-    <div class="brand">
-      <img src="img/logo.png" alt="Sobrenatural Church" class="logo-full" />
-      <div>
-        <h1>Show do Crentão</h1>
-        <div class="sub">Discipulado Nível 2 — Aula 1</div>
-      </div>
+<body class="has-cover">
+  <!-- Appbar aparece só depois da animação -->
+  <header class="appbar">
+    <div class="brand-left">
+      <img src="img/logo.png" alt="Sobrenatural Church" />
+      <div class="muted" style="font-size:.9rem">Discipulado Nível 2 — Aula 1</div>
     </div>
+    <div class="brand-right">Show do Crentão</div>
   </header>
 
   <main>
-    <!-- Tela inicial -->
-    <section id="screen-home" class="card grid">
-      <h2 class="center">Bem-vindo!</h2>
-      <p class="muted center">Escolha uma opção abaixo.</p>
-      <div class="grid-2">
-        <button id="goParticipar" class="btn row">Participar do Quiz</button>
-        <button id="goRanking" class="btn ghost row">Ver Ranking</button>
+    <!-- CAPA / PAINEL INICIAL -->
+    <section id="hero" class="hero">
+      <h1>Show do Crentão</h1>
+      <div class="sub">Bem-vindo! Escolha uma opção abaixo.</div>
+      <div class="actions">
+        <button id="goParticipar" class="btn">Participar do Quiz</button>
+        <button id="goRanking" class="btn ghost">Ver Ranking</button>
       </div>
+      <div class="muted" style="font-size:.85rem">Dica: use uma imagem <code>img/cover.png</code> como capa de fundo.</div>
     </section>
 
     <!-- Dados do participante -->
@@ -93,8 +140,8 @@
       <h2>Resultado</h2>
       <p id="resultText" class="muted"></p>
       <div class="grid-2">
-        <button id="btnVerRanking" class="btn row">Ver Ranking</button>
-        <button id="btnVoltarInicio" class="btn ghost row">Início</button>
+        <button id="btnVerRanking" class="btn">Ver Ranking</button>
+        <button id="btnVoltarInicio" class="btn ghost">Início</button>
       </div>
     </section>
 
@@ -120,189 +167,34 @@
 
   <script>
     /* ================== CONFIG ================== */
-    const QUIZ_VERSION = 'v4';
+    const QUIZ_VERSION = 'v4-anim';
     const STORAGE_KEY = 'discipulado_quiz_' + QUIZ_VERSION;
     const $ = id => document.getElementById(id);
+    const qs = (s, r=document) => r.querySelector(s);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
     const titleCase = s => s.trim().replace(/\s+/g,' ').split(' ').map(w => (w[0]||'').toUpperCase()+w.slice(1).toLowerCase()).join(' ');
     function loadAll(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : { submissions: [] }; } catch(e){ return { submissions: [] }; } }
     function saveAll(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
-    function show(id){ ['screen-home','screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
+    function show(id){ ['screen-register','screen-quiz','screen-result','screen-ranking'].forEach(s=> $(s).classList.add('hidden')); $(id).classList.remove('hidden'); }
 
-    /* ================== PERGUNTAS ================== */
-    const QUESTIONS = [
-      { title: "O que caracteriza a obediência imediata?",
-        options: ["Agir após confirmar com outras pessoas.","Responder sem demora ao que Deus ordena.","Esperar o momento mais conveniente.","Agir somente quando tudo estiver claro."],
-        correctIndex: 1 },
-      { title: "O que é fé genuína segundo o estudo?",
-        options: ["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
-        correctIndex: 2 },
-      { title: "Quais são os quatro aspectos que transformaram Abraão em Pai da Fé?",
-        options: ["Obediência imediata, obediência parcial, fé genuína, perseverança.","Obediência imediata, obediência total, fé genuína, perseverança.","Obediência, oração, jejum, perseverança.","Obediência total, milagres, fé emprestada, perseverança."],
-        correctIndex: 1 },
-      { title: "Qual é a importância de testemunhar as obras de Deus?",
-        options: ["Tornar-se mais conhecido na igreja.","Inspirar e fortalecer a fé de outros.","Cumprir uma obrigação religiosa.","Garantir bênçãos futuras."],
-        correctIndex: 1 }
-    ];
+    /* Detecta se tem capa */
+    (function checkCover(){
+      const img = new Image();
+      img.onload = ()=> document.body.classList.add('has-cover');
+      img.onerror = ()=> document.body.classList.remove('has-cover');
+      img.src = 'img/cover.png';
+    })();
 
-    /* ================== ÁUDIO DE ABERTURA ================== */
+    /* ======= ÁUDIO INTRO ======= */
     const intro = $('sfx-intro');
     const stopIntro = () => { try { intro.pause(); intro.currentTime = 0; } catch(e){} };
     const startIntro = () => { try { intro.currentTime = 0; intro.play().catch(()=>{}); } catch(e){} };
 
-    /* ================== NAVEGAÇÃO ================== */
-    $('goParticipar').addEventListener('click', ()=> { show('screen-register'); startIntro(); });
-    $('goRanking').addEventListener('click', ()=> { stopIntro(); renderRanking(); show('screen-ranking'); });
-
-    function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
-    function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
-
-    /* ================== CADASTRO ================== */
-    $('btnSendRegister').addEventListener('click', () => {
-      const name = titleCase(($('nome').value||''));
-      const phoneRaw = normPhone(($('fone').value||''));
-      const box = $('msgRegister'); clearMsg(box);
-      if (!name || name.length<3) return setMsg(box,'Informe seu nome completo.','warn');
-      if (!phoneRaw || phoneRaw.length<10) return setMsg(box,'Informe um telefone válido com DDD.','warn');
-
-      const all = loadAll();
-      if (all.submissions.some(s => s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw)){
-        return setMsg(box, 'Você já respondeu este quiz e não pode responder novamente.', 'error');
-      }
-
-      // parar a música ao enviar os dados
-      stopIntro();
-
-      sessionStorage.setItem('quiz_participant', JSON.stringify({ name, phone: phoneRaw, startedAt: nowISO() }));
-      quizState.index = 0; quizState.correct = 0; quizState.selected = null;
-      renderCurrentQuestion();
-      show('screen-quiz');
-    });
-
-    /* ================== QUIZ ================== */
-    const quizState = { index: 0, correct: 0, selected: null };
-
-    function renderCurrentQuestion(){
-      // garantia: ao começar perguntas, a intro deve estar parada
-      stopIntro();
-
-      const step = $('quizStep'); step.innerHTML='';
-      const q = QUESTIONS[quizState.index];
-      const wrap = document.createElement('div'); wrap.className='grid';
-      const title = document.createElement('div'); title.className='q-title'; title.textContent = `Pergunta ${quizState.index+1} de ${QUESTIONS.length}: ` + q.title;
-      const qs = document.createElement('div'); qs.className='q';
-      q.options.forEach((opt, oi)=>{
-        const lbl = document.createElement('label'); lbl.className='opt';
-        const inp = document.createElement('input'); inp.type='radio'; inp.name='alt'; inp.value=oi;
-        inp.addEventListener('change', ()=> quizState.selected = oi);
-        const span = document.createElement('span'); span.textContent = opt;
-        lbl.appendChild(inp); lbl.appendChild(span); qs.appendChild(lbl);
-      });
-      const row = document.createElement('div'); row.className='grid-2';
-      const btnEnviar = document.createElement('button'); btnEnviar.className='btn'; btnEnviar.textContent='Enviar';
-      const btnLimpar = document.createElement('button'); btnLimpar.className='btn ghost'; btnLimpar.textContent='Limpar';
-      row.appendChild(btnEnviar); row.appendChild(btnLimpar);
-
-      const fb = document.createElement('div'); fb.id='feedback'; fb.className='feedback hidden fx';
-
-      wrap.appendChild(title); wrap.appendChild(qs); wrap.appendChild(row); wrap.appendChild(fb);
-      step.appendChild(wrap);
-
-      btnLimpar.addEventListener('click', ()=>{
-        quizState.selected = null; qs.querySelectorAll('input[type=radio]').forEach(r=> r.checked=false);
-      });
-
-      btnEnviar.addEventListener('click', ()=>{
-        if (quizState.selected === null){ fb.className='notice'; fb.textContent='Selecione uma alternativa antes de enviar.'; fb.classList.remove('hidden'); return; }
-        askConfirmation(fb, () => { evaluateAnswer(fb); });
-      });
-
-      // prompt da pergunta
-      playOne(['sfx-pergunta']);
-    }
-
-    function askConfirmation(container, onConfirm){
-      // toca "Você tem certeza?" ou "Está certo disso?"
-      playOne(Math.random() < 0.5 ? ['sfx-certeza'] : ['sfx-esta-certo']);
-      container.className='feedback fx'; container.innerHTML='';
-      const p = document.createElement('div'); p.style.fontWeight='900'; p.textContent='Você tem certeza da resposta?';
-      const row = document.createElement('div'); row.className='grid-2';
-      const btnConf = document.createElement('button'); btnConf.className='btn'; btnConf.textContent='Confirmar';
-      const btnCanc = document.createElement('button'); btnCanc.className='btn ghost'; btnCanc.textContent='Cancelar';
-      row.appendChild(btnConf); row.appendChild(btnCanc);
-      container.appendChild(p); container.appendChild(row);
-      container.classList.remove('hidden');
-      btnConf.addEventListener('click', onConfirm);
-      btnCanc.addEventListener('click', ()=> { container.classList.add('hidden'); container.innerHTML=''; });
-    }
-
-    function simpleConfetti(container){
-      for(let i=0;i<22;i++){
-        const c = document.createElement('div'); c.className='confetti'; c.style.left='50%'; c.style.setProperty('--x', (Math.random()*200-100).toFixed(0));
-        c.style.background = `hsl(${Math.floor(Math.random()*360)},100%,70%)`;
-        c.style.animationDuration = (1+Math.random()*0.8).toFixed(2)+'s';
-        container.appendChild(c); setTimeout(()=> c.remove(), 1700);
-      }
-    }
-
-    function evaluateAnswer(fb){
-      const q = QUESTIONS[quizState.index];
-      const correct = (quizState.selected === q.correctIndex);
-      if (correct){
-        quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!';
-        playOne(['sfx-certa-resposta']); simpleConfetti(fb);
-      } else {
-        fb.className='feedback error'; fb.textContent='Resposta errada!';
-        playOne(['sfx-errou']);
-      }
+    /* ======= HERO ANIMAÇÃO ======= */
+    function startAppFlow(next){
+      const hero = $('hero');
+      hero.classList.add('hide-out');
       setTimeout(()=>{
-        quizState.selected = null;
-        if (quizState.index < QUESTIONS.length-1){
-          quizState.index++; renderCurrentQuestion();
-        } else { finishQuiz(); }
-      }, 2000);
-    }
+        doc
 
-    function playOne(ids){ try{ ids.forEach(id => { const el=$(id); if (el){ el.currentTime=0; el.play().catch(()=>{}); } }); }catch(e){} }
-
-    function finishQuiz(){
-      const part = JSON.parse(sessionStorage.getItem('quiz_participant')||'null');
-      if (!part) { show('screen-home'); return; }
-      const store = loadAll();
-      if (store.submissions.some(s => s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){
-        show('screen-home'); return;
-      }
-      const item = { name: part.name, phone: part.phone, score: quizState.correct, total: QUESTIONS.length, timestamp: nowISO() };
-      store.submissions.push(item); saveAll(store);
-      $('resultText').textContent = `Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
-      show('screen-result'); sessionStorage.removeItem('quiz_participant');
-    }
-
-    /* ================== RANKING ================== */
-    function renderRanking(){
-      const list = $('rankList'); const count = $('rankCount');
-      const data = [...loadAll().submissions];
-      data.sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
-      count.textContent = data.length ? `Total de participantes: ${data.length}` : 'Sem participantes.';
-      if (!data.length){ list.innerHTML = '<div class="muted">Sem envios ainda.</div>'; return; }
-      list.innerHTML = data.map((r,i)=>{
-        const pos = i+1; const phoneMasked = maskPhone(r.phone);
-        return `<div class="rank-item">
-          <div class="rank-pos">${pos}</div>
-          <div><div style="font-weight:900">${r.name}</div><div class="muted">${phoneMasked} · ${r.timestamp}</div></div>
-          <div class="score">${r.score}/${r.total}</div>
-        </div>`;
-      }).join('');
-    }
-    function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p; return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
-
-    $('btnVerRanking').addEventListener('click', ()=>{ renderRanking(); show('screen-ranking'); });
-    $('btnVoltarInicio').addEventListener('click', ()=> show('screen-home'));
-    $('btnVoltarHome').addEventListener('click', ()=> show('screen-home'));
-
-    // tela inicial
-    show('screen-home');
-  </script>
-</body>
-</html>
