@@ -8,40 +8,44 @@
   <style>
     :root{
       --bg:#000; --text:#fff; --muted:#cbd5e1;
-      --green:#1bd39b; --green-deep:#12b37f; --ring:#29f0b6;
+      --green:#1bd39b; --green-deep:#12b37f;
       --white:#ffffff; --ink:#0b0f12;
       --panel:#050a0a; --panel-2:#071313; --border:#0c1f1d;
-      --ok:#22c55e; --error:#ef4444;
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;line-height:1.45}
-    /* FUNDO (a sua arte é o BACKGROUND) */
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
+
+    /* FUNDO = sua arte */
     body::before{
       content:""; position:fixed; inset:0; z-index:-2;
       background:
         linear-gradient(180deg,rgba(0,0,0,.58),rgba(0,0,0,.9)),
         url("img/cover.png") center/cover no-repeat;
     }
-    main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
 
-    /* HERO */
-    .hero{
-      margin:48px auto 24px; max-width:980px;
-      background:rgba(0,0,0,.72); border:1px solid #0b1714; border-radius:20px;
-      box-shadow:0 18px 45px rgba(0,0,0,.55);
-      padding:28px 28px 32px; display:grid; gap:18px; justify-items:center; text-align:center;
-      transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .6s ease;
+    /* ====== LANDING: só os dois botões sobre a imagem ====== */
+    .landing{
+      min-height:100svh;             /* ocupa a tela inteira */
+      display:flex; align-items:flex-end; justify-content:center;
+      padding:0 16px 8vh;            /* joga os botões mais perto da parte de baixo */
+      transition:opacity .45s ease, transform .45s ease;
     }
-    .hero h1{margin:0; font-size:clamp(1.6rem,1rem + 2.6vw,2.8rem)}
-    .sub{color:var(--muted)}
-    .actions{display:grid; gap:18px; grid-template-columns:1fr 1fr; width:min(820px,100%)}
-    @media (max-width:720px){ .actions{grid-template-columns:1fr} }
+    .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
 
-    .btn{appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
+    .cta{
+      width:min(920px,100%);
+      display:grid; gap:18px; grid-template-columns:1fr 1fr;
+    }
+    @media (max-width:720px){
+      .cta{ grid-template-columns:1fr; }
+    }
+    .btn{
+      appearance:none;border:0;cursor:pointer;padding:18px 20px;border-radius:12px;
       font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
-      font-size:clamp(1rem,.6rem + 1.4vw,1.6rem);
-      transition:transform .06s ease, box-shadow .2s ease, filter .2s}
+      font-size:clamp(1rem,0.6rem + 1.4vw,1.6rem);
+      transition:transform .06s ease, box-shadow .2s ease, filter .2s;
+    }
     .btn.start{color:#02110c;background:linear-gradient(180deg,var(--green),var(--green-deep));
       box-shadow:0 6px 16px rgba(27,211,155,.28), inset 0 1px 0 rgba(255,255,255,.35);
       border:1px solid #10d49f}
@@ -51,28 +55,17 @@
     .btn.rank:hover{box-shadow:0 0 0 3px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.45)}
     .btn.rank:active{transform:translateY(1px)}
 
-    /* LOGO NO CANTO (apenas DEPOIS do clique) */
-    .logo-badge{
-      position:fixed; right:20px; top:16px; width:min(320px,38vw);
-      z-index:4; pointer-events:none; opacity:0; transform:translateY(-8px) scale(.98);
-      transition:opacity .45s ease, transform .45s ease;
-      display:none; /* não aparece na tela inicial */
-    }
-    .app-started .logo-badge{ display:block; }
-    .app-started .logo-badge.show{ opacity:.95; transform:none; }
-
-    /* APPBAR (logo da igreja à esquerda) */
+    /* ====== APP / telas internas ====== */
     header.appbar{
       position:sticky; top:0; z-index:5; padding:10px 16px;
       border-bottom:1px solid #0b1b19; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
       display:none; align-items:center; justify-content:space-between; gap:12px;
     }
     .app-started header.appbar{ display:flex; }
-    .brand-left{display:flex;align-items:center;gap:10px}
-    .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.15))}
-    .brand-right{font-weight:900;letter-spacing:.02em;color:#eafff7}
+    .brand-left img{height:38px;object-fit:contain;filter:drop-shadow(0 0 2px rgba(255,255,255,.12))}
+    .brand-right{font-weight:900;letter-spacing:.02em}
 
-    /* CARTÕES E QUIZ */
+    main{max-width:1100px;margin:0 auto 64px;padding:18px 16px}
     .card{border:1px solid var(--border);border-radius:16px;background:var(--panel);padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.55)}
     .grid{display:grid;gap:14px}
     .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
@@ -97,32 +90,24 @@
     .rank-item{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid #0c1f1d;border-radius:12px;background:#071313}
     .rank-pos{width:42px;height:42px;display:grid;place-items:center;background:#081716;border-radius:10px;border:1px solid #0f2a26}
     .score{font-weight:900}
-
-    .hero.hide-out{opacity:0; transform:translateY(-18px) scale(.98); pointer-events:none}
-    .app-started .hero{display:none}
   </style>
 </head>
 <body>
-  <!-- LOGO compacta para o canto (só aparece DEPOIS do clique) -->
-  <img id="logoBadge" class="logo-badge" src="img/show-logo.png" alt="Show do Crentão">
-
-  <!-- APPBAR -->
+  <!-- APPBAR (só depois que clicar) -->
   <header class="appbar">
     <div class="brand-left"><img src="img/logo.png" alt="Sobrenatural Church" /></div>
     <div class="brand-right">Show do Crentão</div>
   </header>
 
-  <main>
-    <!-- CAPA -->
-    <section id="hero" class="hero">
-      <h1>Show do Crentão</h1>
-      <div class="sub">Bem-vindo! Escolha uma opção abaixo.</div>
-      <div class="actions">
-        <button id="goParticipar" class="btn start">Iniciar</button>
-        <button id="goRanking"   class="btn rank">Ranking</button>
-      </div>
-    </section>
+  <!-- LANDING: APENAS OS DOIS BOTÕES -->
+  <section id="landing" class="landing">
+    <div class="cta">
+      <button id="goParticipar" class="btn start">Iniciar</button>
+      <button id="goRanking"   class="btn rank">Ranking</button>
+    </div>
+  </section>
 
+  <main>
     <!-- CADASTRO -->
     <section id="screen-register" class="card grid hidden">
       <h2>Dados do participante</h2>
@@ -170,8 +155,8 @@
   <audio id="sfx-errou"        src="audio/faustao-errou.mp3"                             preload="auto"></audio>
 
   <script>
-    /* ====== STORAGE / UTILS ====== */
-    const QUIZ_VERSION='v6b-bg-fixo'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    /* ====== BASE / STORAGE ====== */
+    const QUIZ_VERSION='v7-landing-simples'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -185,18 +170,15 @@
     const startIntro=()=>{ try{ intro.currentTime=0; intro.play().catch(()=>{});}catch(e){} }
     const stopIntro =()=>{ try{ intro.pause(); intro.currentTime=0;}catch(e){} }
 
-    /* ANIMAÇÃO DE ENTRADA (tira o painel e mostra o logo no canto) */
-    function startAppFlow(next){
-      const hero=$('hero'); hero.classList.add('hide-out');
-      document.body.classList.add('app-started');              // mostra appbar
-      const badge=$('logoBadge');                              // exibe logo no canto
-      setTimeout(()=>{ badge.classList.add('show'); }, 50);
-      setTimeout(next, 580);
+    /* Entradas da landing */
+    function enterApp(next){
+      $('landing').classList.add('hide');
+      document.body.classList.add('app-started'); // mostra appbar
+      setTimeout(next, 420);
     }
 
-    /* NAVEGAÇÃO INICIAL */
-    $('goParticipar').addEventListener('click', ()=>{ startIntro(); startAppFlow(()=> show('screen-register'));});
-    $('goRanking').addEventListener('click',   ()=>{ stopIntro();  startAppFlow(()=>{ renderRanking(); show('screen-ranking');});});
+    $('goParticipar').addEventListener('click', ()=>{ startIntro(); enterApp(()=> show('screen-register'));});
+    $('goRanking').addEventListener('click',   ()=>{ stopIntro();  enterApp(()=>{ renderRanking(); show('screen-ranking');});});
 
     function setMsg(el, text, type){ el.textContent=text; el.className='notice ' + (type||''); el.classList.remove('hidden'); }
     function clearMsg(el){ el.classList.add('hidden'); el.textContent=''; }
@@ -209,7 +191,7 @@
       const all=loadAll();
       if(all.submissions.some(s=>s.name.toLowerCase()===name.toLowerCase() && s.phone===phoneRaw))
         return setMsg(box,'Você já respondeu este quiz e não pode responder novamente.','error');
-      stopIntro(); // PARA música ao enviar
+      stopIntro(); // para música ao enviar
       sessionStorage.setItem('quiz_participant', JSON.stringify({name, phone:phoneRaw, startedAt:nowISO()}));
       quizState.index=0; quizState.correct=0; quizState.selected=null;
       renderCurrentQuestion(); show('screen-quiz');
@@ -266,16 +248,13 @@
         c.style.background=`hsl(${Math.floor(Math.random()*360)},100%,70%)`; c.style.animationDuration=(1+Math.random()*0.8).toFixed(2)+'s';
         container.appendChild(c); setTimeout(()=> c.remove(),1700); }
     }
-
     function evaluateAnswer(fb){
-      const q=QUESTIONS[quizState.index]; const correct=(quizState.selected===q.correctIndex);
-      if(correct){ quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!'; playOne(['sfx-certa-resposta']); simpleConfetti(fb); }
-      else{ fb.className='feedback error'; fb.textContent='Resposta errada!'; playOne(['sfx-errou']); }
-      setTimeout(()=>{ quizState.selected=null;
-        if(quizState.index<QUESTIONS.length-1){ quizState.index++; renderCurrentQuestion(); } else { finishQuiz(); } },2000);
+      const q=QUESTIONS[quizState.index]; const ok=(quizState.selected===q.correctIndex);
+      if(ok){ quizState.correct++; fb.className='feedback ok fx'; fb.textContent='Certa resposta!'; playOne(['sfx-certa-resposta']); simpleConfetti(fb); }
+      else { fb.className='feedback error'; fb.textContent='Resposta errada!'; playOne(['sfx-errou']); }
+      setTimeout(()=>{ quizState.selected=null; if(quizState.index<QUESTIONS.length-1){ quizState.index++; renderCurrentQuestion(); } else { finishQuiz(); } },2000);
     }
-
-    function playOne(ids){ try{ ids.forEach(id=>{ const el=$(id); if(el){ el.currentTime=0; el.play().catch(()=>{});} }); }catch(e){} }
+    function playOne(ids){ try{ ids.forEach(id=>{ const el=document.getElementById(id); if(el){ el.currentTime=0; el.play().catch(()=>{});} }); }catch(e){} }
 
     function finishQuiz(){
       const part=JSON.parse(sessionStorage.getItem('quiz_participant')||'null'); if(!part){ show('screen-register'); return; }
@@ -283,13 +262,14 @@
       if(store.submissions.some(s=>s.name.toLowerCase()===part.name.toLowerCase() && s.phone===part.phone)){ show('screen-register'); return; }
       const item={name:part.name, phone:part.phone, score:quizState.correct, total:QUESTIONS.length, timestamp:nowISO()};
       store.submissions.push(item); saveAll(store);
-      $('resultText').textContent=`Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
+      document.getElementById('resultText').textContent=`Sua nota: ${quizState.correct}/${QUESTIONS.length}`;
       show('screen-result'); sessionStorage.removeItem('quiz_participant');
     }
 
     /* RANKING */
     function renderRanking(){
-      const list=$('rankList'), count=$('rankCount'); const data=[...loadAll().submissions];
+      const list=document.getElementById('rankList'); const count=document.getElementById('rankCount');
+      const data=[...loadAll().submissions];
       data.sort((a,b)=> b.score - a.score || a.timestamp.localeCompare(b.timestamp));
       count.textContent=data.length?`Total de participantes: ${data.length}`:'Sem participantes.';
       if(!data.length){ list.innerHTML='<div class="muted">Sem envios ainda.</div>'; return; }
@@ -302,9 +282,11 @@
     function maskPhone(p){ const d=(p||'').replace(/\D+/g,''); if(d.length<10) return p;
       return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`; }
 
-    $('btnVerRanking').addEventListener('click',()=>{ renderRanking(); show('screen-ranking'); });
-    $('btnVoltarInicio').addEventListener('click',()=> location.reload());
-    $('btnVoltarHome').addEventListener('click',()=> location.reload());
+    // Pós-resultado / voltar
+    document.getElementById('btnVerRanking').addEventListener('click',()=>{ renderRanking(); show('screen-ranking'); });
+    document.getElementById('btnVoltarInicio').addEventListener('click',()=> location.reload());
+    document.getElementById('btnVoltarHome').addEventListener('click',()=> location.reload());
   </script>
 </body>
 </html>
+
