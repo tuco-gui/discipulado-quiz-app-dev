@@ -11,36 +11,57 @@
       --green:#1bd39b; --green-deep:#12b37f;
       --white:#ffffff; --ink:#0b0f12;
       --panel:#050a0a; --panel-2:#071313; --border:#0c1f1d;
+
+      /* distância dos botões à base na landing */
+      --landing-pad-bottom: calc(12vh + env(safe-area-inset-bottom, 0px));
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:#000;color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial}
 
     /* ====== FUNDO (só na landing) ====== */
+    body.landing-active{overflow:hidden} /* evita scroll acidental na primeira tela */
+
     body.landing-active::before{
       content:""; position:fixed; inset:0; z-index:-2;
-      /* Foco: responsividade no mobile */
       background:
-        linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.35)),
+        /* Removi escurecimento forte — cores mais vivas */
+        linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.18)),
         url("img/cover.png") center / cover no-repeat;
+      will-change: transform;
+      transform-origin: 50% 30%;
+      /* desktop/tablet: tamanho normal */
+      transform: scale(1);
     }
-    /* Em telas altas e estreitas (retrato), desce um pouco o foco da arte
-       para não cortar o topo. Ajuste leve no eixo Y */
+
+    /* TELEFONE EM MODO RETRATO:
+       - “diminui” a arte (mostra mais da cena)
+       - desce levemente o foco no eixo Y
+       - sobe os botões (mais longe da barra do navegador) */
     @media (max-aspect-ratio: 3/4){
+      :root{ --landing-pad-bottom: calc(18vh + env(safe-area-inset-bottom, 0px)); }
       body.landing-active::before{
-        background-position: center 38%;
+        background-position: center 42%;
+        transform: scale(.86);        /* << reduzir o tamanho percebido do logo */
+      }
+    }
+    /* telefones muito altos/estreitos (ex.: iPhone 13 mini/SE recente) */
+    @media (max-width: 420px) and (max-aspect-ratio: 9/16){
+      :root{ --landing-pad-bottom: calc(20vh + env(safe-area-inset-bottom, 0px)); }
+      body.landing-active::before{
+        background-position: center 40%;
+        transform: scale(.82);        /* << reduz ainda mais */
       }
     }
 
     /* ====== LANDING: só os dois botões sobre a imagem ====== */
     .landing{
       position:fixed; inset:0; z-index:3;
-      /* Usa viewport seguro do iOS e fallback */
-      min-height: 100svh;           /* iOS/Android novos */
-      min-height: 100dvh;           /* fallback novo */
-      min-height: 100vh;            /* fallback geral   */
+      min-height: 100svh; /* iOS/Android novos */
+      min-height: 100dvh; /* fallback novo */
+      min-height: 100vh;  /* fallback geral   */
       display:flex; align-items:flex-end; justify-content:center;
-      padding: 0 16px calc(12vh + env(safe-area-inset-bottom, 0px));
+      padding: 0 16px var(--landing-pad-bottom);
       transition:opacity .45s ease, transform .45s ease;
     }
     .landing.hide{opacity:0; transform:translateY(-8px); pointer-events:none}
@@ -56,7 +77,6 @@
     .btn{
       appearance:none;border:0;cursor:pointer;border-radius:12px;
       font-weight:1000;letter-spacing:.02em;text-transform:uppercase;text-align:center;
-      /* Botões fluidos (altura e fonte reagem à tela) */
       padding: clamp(14px, 3.8vw, 18px) clamp(16px, 4vw, 20px);
       font-size: clamp(1rem, 3.6vw, 1.4rem);
       transition:transform .06s ease, box-shadow .2s ease, filter .2s;
@@ -177,7 +197,7 @@
 
   <script>
     /* ====== BASE / STORAGE ====== */
-    const QUIZ_VERSION='v9-landing-responsiva'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
+    const QUIZ_VERSION='v10-landing-mobile-tuned'; const STORAGE_KEY='discipulado_quiz_'+QUIZ_VERSION;
     const $ = id => document.getElementById(id);
     const normPhone = s => (s||'').replace(/\D+/g,'');
     const nowISO = () => { const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); };
