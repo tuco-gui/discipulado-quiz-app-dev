@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Show do Crentão</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 { color: #1fddac; }
+    button {
+      margin: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-primary { background: #1fddac; color: #000; }
+    .btn-danger { background: #f44336; color: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: left;
+    }
+    th { background: #222; }
+  </style>
+</head>
+<body>
+  <h1>Painel Administrativo</h1>
+
+  <button class="btn-primary" onclick="exportarCSV()">📥 Exportar CSV</button>
+  <button class="btn-danger" onclick="resetarRanking()">🗑️ Zerar Ranking</button>
+
+  <h2>Ranking Atual</h2>
+  <table id="rankingTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Pontos</th>
+        <th>Tesouro</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // 🔑 Configure com suas credenciais
+    const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Carregar ranking
+    async function carregarRanking() {
+      const { data, error } = await supabase
+        .from("ranking")
+        .select("*")
+        .order("tesouro", { ascending: false })
+        .order("pontos", { ascending: false });
+
+      if (error) {
+        alert("Erro ao carregar ranking: " + error.message);
+        return;
+      }
+
+      const tbody = document.querySelector("#rankingTable tbody");
+      tbody.innerHTML = "";
+      data.forEach((r, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${r.nome}</td>
+          <td>${r.fone}</td>
+          <td>${r.pontos}</td>
+          <td>${r.tesouro}</td>
+          <td>${new Date(r.quando).toLocaleString("pt-BR")}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Exportar CSV
+    async function exportarCSV() {
+      const { data, error } = await supabase.from("ranking").select("*");
+      if (error) {
+        alert("Erro ao exportar: " + error.message);
+        return;
+      }
+
+      let csv = "Nome,Telefone,Pontos,Tesouro,Data\n";
+      data.forEach(r => {
+        csv += `${r.nome},${r.fone},${r.pontos},${r.tesouro},${new Date(r.quando).toLocaleString("pt-BR")}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ranking.csv";
+      a.click();
+    }
+
+    // Resetar ranking
+    async function resetarRanking() {
+      if (!confirm("Tem certeza que deseja zerar o ranking?")) return;
+
+      const { error } = await supabase.from("ranking").delete().neq("id", 0);
+      if (error) {
+        alert("Erro ao zerar ranking: " + error.message);
+      } else {
+        alert("Ranking zerado com sucesso!");
+        carregarRanking();
+      }
+    }
+
+    // Carrega ranking ao abrir
+    carregarRanking();
+  </script>
+</body>
+</html>
