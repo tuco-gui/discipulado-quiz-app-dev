@@ -1,55 +1,71 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ranking — Show do Crentão</title>
   <style>
-    body { background:#000; color:#fff; font-family: system-ui; padding:20px; }
-    .card{ background:#111; padding:20px; border-radius:12px; max-width:600px; margin:auto; }
-    h2{ margin-top:0; }
-    .linha{ padding:8px 0; border-bottom:1px solid rgba(255,255,255,.2); }
-    button{ padding:10px 16px; border-radius:8px; border:none; cursor:pointer; margin-top:14px; }
-    .danger{ background:#e33; color:#fff; }
+    body{
+      background:#000; color:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+      margin:0; padding:40px; display:flex; justify-content:center;
+    }
+    .card{
+      background:#111; padding:24px; border-radius:12px; max-width:720px; width:100%;
+      box-shadow:0 12px 40px rgba(0,0,0,.45);
+    }
+    h1{margin:0 0 20px; font-size:26px;}
+    .row{display:flex; gap:12px; margin-top:16px;}
+    button{
+      padding:12px 20px; border:0; border-radius:8px; cursor:pointer; font-weight:600;
+    }
+    .primary{ background:#1fddac; color:#06261f; }
+    .danger{ background:#e74c3c; color:#fff; }
+    .secondary{ background:#fff; color:#111; }
+    .ranking-item{padding:8px 0; border-bottom:1px solid rgba(255,255,255,.1);}
   </style>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <body>
   <div class="card">
-    <h2>Ranking Geral</h2>
+    <h1>Ranking Geral</h1>
     <div id="rankingLista">Carregando...</div>
-    <button onclick="limparRanking()" class="danger">Apagar Ranking</button>
+    <div class="row">
+      <button id="btnRecarregar" class="primary">Recarregar</button>
+      <button id="btnLimpar" class="danger">Apagar Tudo</button>
+    </div>
   </div>
 
 <script>
-const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+(async function(){
+  const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function carregarRanking(){
-  const { data, error } = await supabase
-    .from("ranking")
-    .select("*")
-    .order("tesouro", { ascending: false })
-    .order("pontos", { ascending: false });
+  const lista = document.getElementById("rankingLista");
+  const btnRecarregar = document.getElementById("btnRecarregar");
+  const btnLimpar = document.getElementById("btnLimpar");
 
-  if(error){ document.getElementById("rankingLista").innerText="Erro ao carregar."; return; }
-
-  if(!data.length){ document.getElementById("rankingLista").innerText="Sem participantes ainda."; return; }
-
-  document.getElementById("rankingLista").innerHTML = data.map((r,i)=>
-    `<div class="linha">${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)</div>`
-  ).join("");
-}
-
-async function limparRanking(){
-  if(confirm("Tem certeza que deseja apagar todo o ranking?")){
-    const { error } = await supabase.from("ranking").delete().neq("id", 0);
-    if(error) alert("Erro ao limpar ranking");
-    else{ alert("Ranking apagado!"); carregarRanking(); }
+  async function carregarRanking(){
+    lista.textContent="Carregando...";
+    const { data, error } = await supabase.from("ranking").select("*").order("tesouro",{ascending:false});
+    if(error){ lista.textContent="Erro ao carregar ranking."; return; }
+    if(!data.length){ lista.textContent="Sem participantes ainda."; return; }
+    lista.innerHTML=data.map((r,i)=>
+      `<div class="ranking-item">${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)</div>`
+    ).join("");
   }
-}
 
-carregarRanking();
+  async function limparRanking(){
+    if(!confirm("Tem certeza que deseja apagar TODO o ranking?")) return;
+    await supabase.from("ranking").delete().neq("id",0);
+    carregarRanking();
+  }
+
+  btnRecarregar.addEventListener("click",carregarRanking);
+  btnLimpar.addEventListener("click",limparRanking);
+
+  carregarRanking();
+})();
 </script>
 </body>
 </html>
