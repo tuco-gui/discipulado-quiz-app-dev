@@ -1,135 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin - Show do Crentão</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Ranking Show do Crentão</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      padding: 20px;
-    }
-    h1 { color: #1fddac; }
-    button {
-      margin: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .btn-primary { background: #1fddac; color: #000; }
-    .btn-danger { background: #f44336; color: #fff; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 8px;
-      text-align: left;
-    }
-    th { background: #222; }
+    :root{ --bg:#0b0f0e; --card:#111514; --muted:#aab3b1; --green:#1fddac; --white:#fff; --radius:14px; --shadow:0 12px 40px rgba(0,0,0,.45); }
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    main{max-width:980px;margin:40px auto;padding:0 16px;display:grid;gap:16px}
+    .card{background:rgba(17,21,20,.9);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+    h1{margin:0 0 6px;font-size:22px}
+    .sub{color:#aab3b1;margin:0 0 14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    button{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}
+    .primary{background:linear-gradient(180deg,#1fddac,#0fa17e);color:#06261f}
+    .secondary{background:#fff;color:#0a0d0c}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+    th{color:#aab3b1;text-align:left}
+    .muted{color:#aab3b1}
   </style>
 </head>
 <body>
-  <h1>Painel Administrativo</h1>
+<main>
+  <div class="card">
+    <h1>Admin — Ranking</h1>
+    <p class="sub">Exportar CSV e Zerar ranking (Supabase).</p>
+    <div class="row">
+      <button id="btnExport" class="secondary">Exportar CSV</button>
+      <button id="btnZerar" class="primary">Zerar ranking</button>
+    </div>
+    <div id="msg" class="muted" style="margin-top:10px"></div>
+  </div>
 
-  <button class="btn-primary" onclick="exportarCSV()">📥 Exportar CSV</button>
-  <button class="btn-danger" onclick="resetarRanking()">🗑️ Zerar Ranking</button>
+  <div class="card">
+    <h2 style="margin:0 0 8px">Pré-visualização</h2>
+    <table id="tbl">
+      <thead>
+        <tr><th>#</th><th>Nome</th><th>Fone</th><th>Tesouro</th><th>Acertos</th><th>Quando</th></tr>
+      </thead>
+      <tbody id="tbody"><tr><td class="muted" colspan="6">Carregando…</td></tr></tbody>
+    </table>
+  </div>
+</main>
 
-  <h2>Ranking Atual</h2>
-  <table id="rankingTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Nome</th>
-        <th>Telefone</th>
-        <th>Pontos</th>
-        <th>Tesouro</th>
-        <th>Data</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  <!-- Supabase SDK -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // 🔑 Configure com suas credenciais
-    const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const tbody = document.getElementById('tbody');
+const msg = document.getElementById('msg');
+const btnExport = document.getElementById('btnExport');
+const btnZerar = document.getElementById('btnZerar');
 
-    // Carregar ranking
-    async function carregarRanking() {
-      const { data, error } = await supabase
-        .from("ranking")
-        .select("*")
-        .order("tesouro", { ascending: false })
-        .order("pontos", { ascending: false });
+async function fetchRanking(){
+  const { data, error } = await sb
+    .from('ranking')
+    .select('nome, fone, pontos, tesouro, quando')
+    .order('tesouro',{ascending:false})
+    .order('pontos',{ascending:false})
+    .order('quando',{ascending:true})
+    .limit(1000);
+  if(error){ tbody.innerHTML = `<tr><td colspan="6" class="muted">Erro ao carregar: ${error.message}</td></tr>`; return []; }
+  if(!data?.length){ tbody.innerHTML = `<tr><td colspan="6" class="muted">Sem registros.</td></tr>`; return []; }
+  tbody.innerHTML = data.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.nome||''}</td>
+      <td>${r.fone||''}</td>
+      <td>${Number(r.tesouro||0).toLocaleString('pt-BR')}</td>
+      <td>${r.pontos||0}</td>
+      <td>${new Date(r.quando).toLocaleString('pt-BR')}</td>
+    </tr>`).join('');
+  return data;
+}
 
-      if (error) {
-        alert("Erro ao carregar ranking: " + error.message);
-        return;
-      }
+function toCSV(rows){
+  const head = ["nome","fone","tesouro","pontos","quando"];
+  const escape = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  const lines = [head.join(",")];
+  for(const r of rows){
+    lines.push([r.nome,r.fone,r.tesouro,r.pontos,r.quando].map(escape).join(","));
+  }
+  return lines.join("\n");
+}
 
-      const tbody = document.querySelector("#rankingTable tbody");
-      tbody.innerHTML = "";
-      data.forEach((r, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${i+1}</td>
-          <td>${r.nome}</td>
-          <td>${r.fone}</td>
-          <td>${r.pontos}</td>
-          <td>${r.tesouro}</td>
-          <td>${new Date(r.quando).toLocaleString("pt-BR")}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+function download(filename, text){
+  const blob = new Blob([text],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"),{href:url,download:filename});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
 
-    // Exportar CSV
-    async function exportarCSV() {
-      const { data, error } = await supabase.from("ranking").select("*");
-      if (error) {
-        alert("Erro ao exportar: " + error.message);
-        return;
-      }
+btnExport.onclick = async ()=>{
+  msg.textContent = "Gerando CSV…";
+  const rows = await fetchRanking();
+  const csv = toCSV(rows);
+  download(`ranking-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`, csv);
+  msg.textContent = "CSV exportado.";
+};
 
-      let csv = "Nome,Telefone,Pontos,Tesouro,Data\n";
-      data.forEach(r => {
-        csv += `${r.nome},${r.fone},${r.pontos},${r.tesouro},${new Date(r.quando).toLocaleString("pt-BR")}\n`;
-      });
+btnZerar.onclick = async ()=>{
+  if(!confirm("Tem certeza que deseja APAGAR TODO o ranking?")) return;
+  msg.textContent = "Apagando…";
+  const { error } = await sb.from('ranking').delete().neq('tesouro', null);
+  if(error){ msg.textContent = "Erro: " + error.message; return; }
+  msg.textContent = "Ranking zerado.";
+  await fetchRanking();
+};
 
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "ranking.csv";
-      a.click();
-    }
-
-    // Resetar ranking
-    async function resetarRanking() {
-      if (!confirm("Tem certeza que deseja zerar o ranking?")) return;
-
-      const { error } = await supabase.from("ranking").delete().neq("id", 0);
-      if (error) {
-        alert("Erro ao zerar ranking: " + error.message);
-      } else {
-        alert("Ranking zerado com sucesso!");
-        carregarRanking();
-      }
-    }
-
-    // Carrega ranking ao abrir
-    carregarRanking();
-  </script>
+// primeira carga
+fetchRanking();
+</script>
 </body>
 </html>
