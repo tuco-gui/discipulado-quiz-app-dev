@@ -5,89 +5,190 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Show do Crentão — Sobrenatural Church</title>
   <meta name="theme-color" content="#000000" />
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    /* ... (todo o mesmo CSS que já estava no seu código) ... */
+    :root{
+      --bg:#000; --green:#1fddac; --green-700:#0fa17e; --white:#ffffff;
+      --card:#0c0f0f; --muted:#aab3b1; --radius:14px;
+      --shadow:0 12px 40px rgba(0,0,0,.45); --shadow-soft:0 8px 20px rgba(0,0,0,.35);
+      --pad: clamp(16px, 3vw, 28px); --maxw: 1040px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+    img{display:block;max-width:100%}
+    .hidden{display:none !important}
+    header{position:fixed; inset:0 0 auto 0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 var(--pad); z-index:40; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));}
+    .brand, .right{pointer-events:auto; display:flex; align-items:center; gap:12px;}
+    .brand img{height:22px; opacity:.95}
+    .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45)); display:none;}
+    @media (max-width:768px){ .title-logo{height:22px;} }
+    #hero{position:relative; min-height:100svh; display:flex; align-items:flex-end; justify-content:center; padding: calc(56px + 10svh) var(--pad) calc(20svh); background:#000; overflow:hidden; opacity:1; transform:none;}
+    #hero .bg{ position:absolute; inset:0; z-index:0; display:grid; place-items:center;}
+    #heroImg{ width:100%; height:100%; object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none; }
+    @media (max-width: 768px){ #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);} #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; } }
+    #hero .cta{position:absolute; left:50%; transform:translateX(-50%); bottom: calc(12svh + env(safe-area-inset-bottom)); width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;}
+    .btn{appearance:none; border:0; border-radius:18px; padding:18px 28px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; cursor:pointer; box-shadow: var(--shadow); transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;}
+    .btn:active{transform: translateY(1px); box-shadow: var(--shadow-soft);}
+    .btn.primary{ background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%); color:#06261f; }
+    .btn.secondary{ background:var(--white); color:#0a0d0c }
+    .btn.full{ flex:1 1 320px; }
+    main{display:grid; gap:28px; padding:24px var(--pad) 48px; max-width:var(--maxw); margin:0 auto}
+    .card{background:rgba(12,15,15,.72); backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); box-shadow:var(--shadow); padding: min(28px, 3.2vw);}
+    h2{margin:0 0 6px; font-size:22px}
+    .sub{margin:0 0 14px; font-size:14px; color:#a7b1af}
+    label{display:block; font-size:14px; margin:14px 0 6px; color:#cdd5d3}
+    input[type="text"], input[type="tel"]{width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0b0f0e; color:#fff; outline:none;}
+    .help{font-size:13px; color:#93a29f; margin-top:10px}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .row .btn{min-width:180px}
+    #section-form, #section-quiz, #section-ranking{display:none}
+    .confirm-box{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0a0f0f; }
+    .confirm-title{font-weight:800; margin-bottom:10px;}
+    .helpbox{margin-top:12px; font-size:13px; color:#a7b1af}
+    #fxOverlay{ position:fixed; inset:0; pointer-events:none; z-index:60; }
+    .fx-ok::after{content:""; position:absolute; inset:0; margin:auto; width:min(55vmin,520px); height:min(55vmin,520px); border-radius:50%; background:radial-gradient(ellipse at center, rgba(31,221,172,.28), rgba(31,221,172,0) 60%); animation:okPulse .95s ease-out forwards;}
+    @keyframes okPulse{ 0%{transform:scale(.7); opacity:.0} 25%{opacity:.9} 100%{transform:scale(1.15); opacity:0} }
+    .fx-wrong{ animation:shake .6s ease-in-out 0s 1; }
+    .fx-wrong::after{content:""; position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(242,78,58,.18), rgba(242,78,58,0) 65%); animation:fadeOut .8s ease forwards;}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+    @keyframes fadeOut{ from{opacity:.9} to{opacity:0} }
   </style>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <body>
-  <!-- (o mesmo HTML da versão que você mandou, sem cortar nada) -->
+
+<header>
+  <div class="brand"><img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'"></div>
+  <div class="right"><img id="crentaoLogo" class="title-logo" alt="Show do Crentão" /></div>
+</header>
+
+<!-- HOME -->
+<section id="hero">
+  <div class="bg"><img id="heroImg" alt="Capa – Show do Crentão" class="hidden"></div>
+  <div class="cta">
+    <button id="btnStart" class="btn primary full">Iniciar</button>
+    <button id="btnRanking" class="btn secondary full">Ranking</button>
+  </div>
+</section>
+
+<main>
+  <!-- FORM -->
+  <section id="section-form" class="card">
+    <h2>Dados do participante</h2>
+    <label>Nome completo</label>
+    <input id="nome" type="text" placeholder="Ex.: Maria Silva">
+    <label>Telefone (com DDD)</label>
+    <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
+    <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
+    <div class="row" style="margin-top:16px">
+      <button id="btnEnviarDados" class="btn primary">Enviar</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="section-quiz" class="card">
+    <h2 id="quizPergunta">Pergunta</h2>
+    <p id="valorPergunta" class="sub"></p>
+    <div class="row" id="lifelines" style="margin:6px 0 10px">
+      <button id="btnUni"  class="btn secondary">Universitários</button>
+      <button id="btn5050" class="btn secondary">50/50</button>
+      <button id="btnPular" class="btn secondary">Pular</button>
+    </div>
+    <div id="ajudaBox" class="helpbox hidden"></div>
+    <div id="quizOpcoes"></div>
+    <div id="confirmBox" class="confirm-box hidden">
+      <div class="confirm-title">Você tem certeza da resposta?</div>
+      <div class="row"><button id="btnConfirmar" class="btn primary">Confirmar</button></div>
+    </div>
+    <div id="posAcertoBox" class="confirm-box hidden">
+      <div class="confirm-title" id="posAcertoTitulo"></div>
+      <div class="row">
+        <button id="btnParar" class="btn secondary">Parar</button>
+        <button id="btnContinuar" class="btn primary">Continuar</button>
+      </div>
+    </div>
+    <div class="row" id="actionRow" style="margin-top:16px">
+      <button id="btnResponder" class="btn primary">Enviar</button>
+      <button id="btnLimpar" class="btn secondary">Limpar</button>
+    </div>
+    <audio id="fxCerteza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
+    <audio id="fxEntendeu" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
+    <audio id="fxEstaCerto" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
+    <audio id="fxQualResposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
+    <audio id="fxCertaResposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
+    <audio id="fxErrou" src="audio/faustao-errou.mp3" preload="auto"></audio>
+    <audio id="fxAbertura" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
+  </section>
+
+  <!-- RANKING -->
+  <section id="section-ranking" class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <h2>Ranking</h2>
+    </div>
+    <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
+    <div class="row" style="margin-top:16px">
+      <button id="btnVoltar" class="btn secondary">Voltar</button>
+    </div>
+  </section>
+</main>
+
+<div id="fxOverlay" aria-hidden="true"></div>
 
 <script>
 (async function(){
-  /* ---------- Supabase ---------- */
   const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ---------- refs ---------- */
-  // (mantém todas as refs, áudios, funções utilitárias, etc — igual no seu código atual)
+  const hero=document.getElementById('hero');
+  const heroImg=document.getElementById('heroImg');
+  const crentaoLogo=document.getElementById('crentaoLogo');
+  const secForm=document.getElementById('section-form');
+  const secQuiz=document.getElementById('section-quiz');
+  const secRank=document.getElementById('section-ranking');
+  const btnStart=document.getElementById('btnStart');
+  const btnRanking=document.getElementById('btnRanking');
+  const btnVoltar=document.getElementById('btnVoltar');
+  const nome=document.getElementById('nome');
+  const fone=document.getElementById('fone');
+  const btnEnviarDados=document.getElementById('btnEnviarDados');
 
-  /* ---------- storage -> trocado por Supabase ---------- */
-  async function salvarRanking(registro){
-    const { error } = await supabase.from("ranking").insert([registro]);
-    if(error) console.error("Erro ao salvar no Supabase:", error);
+  function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
+  function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
+  function goHome(){ hideAll(); toggleLogo(false); window.scrollTo(0,0); hero.style.display='block'; }
+
+  btnStart.addEventListener('click',()=>{ hero.style.display='none'; hideAll(); secForm.style.display='block'; });
+  btnRanking.addEventListener('click',()=>{ hero.style.display='none'; hideAll(); secRank.style.display='block'; renderRanking(); });
+  btnVoltar.addEventListener('click',goHome);
+
+  let participanteAtual=null;
+
+  btnEnviarDados.addEventListener('click', ()=>{
+    const n=(nome.value||'').trim(); const f=(fone.value||'').trim();
+    if(!n||!f){ alert('Preencha nome e telefone.'); return; }
+    participanteAtual={nome:n,fone:f}; iniciarQuiz();
+  });
+
+  // perguntas exemplo (use as suas)
+  const perguntas=[{ enunciado:'Quem é o maior exemplo de servo?', opcoes:['Davi','Moisés','Jesus','Paulo'], certa:2 }];
+  const ladder=[100,200,300];
+  let idx=0, escolha=null, acertos=0;
+
+  function iniciarQuiz(){ hideAll(); secQuiz.style.display='block'; toggleLogo(true); renderPergunta(); }
+  function renderPergunta(){ const p=perguntas[idx]; document.getElementById('quizPergunta').textContent=p.enunciado; document.getElementById('quizOpcoes').innerHTML=p.opcoes.map((txt,i)=>`<label><input type="radio" name="op" value="${i}"/> ${txt}</label>`).join(""); }
+
+  async function finalizar(){
+    const tesouro=acertos*100;
+    await supabase.from("ranking").insert([{nome:participanteAtual.nome,fone:participanteAtual.fone,pontos:acertos,tesouro:tesouro,quando:new Date().toISOString()}]);
+    hideAll(); secRank.style.display='block'; renderRanking();
   }
 
-  async function listarRanking(){
-    const { data, error } = await supabase.from("ranking").select("*").order("tesouro",{ascending:false}).order("pontos",{ascending:false}).order("quando",{ascending:true});
-    if(error){ console.error("Erro ao listar:", error); return []; }
-    return data;
-  }
-
-  async function zerarRanking(){
-    const { error } = await supabase.from("ranking").delete().neq("id",0);
-    if(error) console.error("Erro ao zerar ranking:", error);
-  }
-
-  /* ---------- finalizar (agora grava no Supabase) ---------- */
-  function finalizar(parou=false, pulouNoFim=false, errou=false){
-    let tesouro=0;
-    if (parou) {
-      tesouro = ladder[idx];
-    } else if (errou) {
-      tesouro = calculaCheckpoint();
-    } else {
-      tesouro = acertos===perguntas.length ? ladder[ladder.length-1] : calculaCheckpoint();
-    }
-
-    const registro={
-      nome:participanteAtual.nome,
-      fone:participanteAtual.fone,
-      pontos:Number(acertos)||0,
-      tesouro:Number(tesouro)||0,
-      quando:new Date().toISOString()
-    };
-
-    salvarRanking(registro).then(()=> renderRanking());
-    hideAll(); toggleLogo(true); secRank.style.display='block';
-  }
-
-  /* ---------- render ranking ---------- */
   async function renderRanking(){
-    const rank=await listarRanking();
-    const box=document.getElementById("rankingLista");
-    if(!rank.length){ box.textContent="Sem participantes por enquanto."; return; }
-    const linhas=rank.map((r,i)=> `${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro.toLocaleString('pt-BR')} talento(s) · ${r.pontos} acerto(s)`);
-    box.innerHTML=linhas.map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join('');
+    const { data } = await supabase.from("ranking").select("*").order("tesouro",{ascending:false});
+    const box=document.getElementById('rankingLista');
+    if(!data.length){ box.textContent='Sem participantes ainda.'; return; }
+    box.innerHTML=data.map((r,i)=>`${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)`).join('<br>');
   }
-
-  /* ---------- botão reset ---------- */
-  const btnResetDev=document.getElementById("btnResetDev");
-  if(location.hash==="#dev"){
-    btnResetDev.classList.remove("hidden");
-    btnResetDev.addEventListener("click", async ()=>{
-      if(confirm("Apagar todos os resultados do ranking no Supabase?")){
-        await zerarRanking();
-        renderRanking();
-        alert("Ranking limpo no Supabase.");
-      }
-    });
-  }
-
-  // (todo o resto do código permanece igual: iniciarQuiz, renderPergunta, lifelines, áudios, etc.)
 })();
 </script>
 </body>
 </html>
-
