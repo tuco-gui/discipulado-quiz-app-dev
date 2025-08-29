@@ -356,7 +356,7 @@
 
   /* ---------- escada de “prêmios” (talentos de sabedoria) ---------- */
   const ladder = [100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,300000,500000,750000,1000000];
-  const safeIdx = new Set([4,9,14]); // níveis de segurança (0-based)
+  const safeIdx = new Set([4,9,14]); // checkpoints (0-based)
 
   let idx = 0, escolha = null, acertos = 0;
 
@@ -404,6 +404,7 @@
     canPlay( confirmAudios[idx % confirmAudios.length] );
   });
 
+  // === CORRIGIDO: SEMPRE SEGUE ATÉ A 16ª ===
   btnConf.addEventListener('click', async ()=>{
     stopAllFx();
     const ok = (escolha === perguntas[idx].certa);
@@ -413,12 +414,11 @@
 
     idx++; escolha=null;
 
-    if(idx < perguntas.length && ok){
-      renderPergunta(); canPlay(fxEntendeu);
-    } else if(idx < perguntas.length && !ok){
-      finalizar(); // errou antes do final
+    if(idx < perguntas.length){
+      renderPergunta(); 
+      canPlay(fxEntendeu);
     } else {
-      finalizar(); // terminou as 16
+      finalizar();
     }
   });
 
@@ -430,7 +430,6 @@
   /* ---------- ranking ---------- */
   function calculaTesouro(){
     if (acertos === perguntas.length) return ladder[ladder.length-1];
-    // índice da última pergunta acertada é acertos-1
     let premioSeguranca = 0;
     for (let i=0;i<acertos;i++){
       if (safeIdx.has(i)) premioSeguranca = ladder[i];
@@ -444,11 +443,10 @@
     rank.push({
       nome: participanteAtual.nome,
       fone: participanteAtual.fone,
-      pontos: Number(acertos)||0,     // guardo acertos para desempate
-      tesouro: Number(tesouro)||0,    // talentos de sabedoria
+      pontos: Number(acertos)||0,
+      tesouro: Number(tesouro)||0,
       quando: Date.now()
     });
-    // ordena por talentos, depois por acertos, depois por data
     rank.sort((a,b)=> b.tesouro - a.tesouro || b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
     hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking();
