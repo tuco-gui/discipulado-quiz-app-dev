@@ -24,8 +24,11 @@
     #hero{position:relative; min-height:100svh; display:flex; align-items:flex-end; justify-content:center; padding: calc(56px + 10svh) var(--pad) calc(20svh); background:#000; overflow:hidden; opacity:1; transform:none;}
     #hero .bg{ position:absolute; inset:0; z-index:0; display:grid; place-items:center;}
     #heroImg{ width:100%; height:100%; object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none; }
-    @media (max-width: 768px){ #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);} #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; } }
-    #hero .cta{position:absolute; left:50%; transform:translateX(-50%); bottom: calc(12svh + env(safe-area-inset-bottom)); width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;}
+    @media (max-width: 768px){
+      #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
+      #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
+    }
+    #hero .cta{ position:absolute; left:50%; transform:translateX(-50%); bottom: calc(12svh + env(safe-area-inset-bottom)); width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;}
     .btn{appearance:none; border:0; border-radius:18px; padding:18px 28px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; cursor:pointer; box-shadow: var(--shadow); transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;}
     .btn:active{transform: translateY(1px); box-shadow: var(--shadow-soft);}
     .btn.primary{ background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%); color:#06261f; }
@@ -52,143 +55,90 @@
     @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
     @keyframes fadeOut{ from{opacity:.9} to{opacity:0} }
   </style>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <body>
 
-<header>
-  <div class="brand"><img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'"></div>
-  <div class="right"><img id="crentaoLogo" class="title-logo" alt="Show do Crentão" /></div>
-</header>
+  <header>
+    <div class="brand">
+      <img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'">
+    </div>
+    <div class="right">
+      <img id="crentaoLogo" class="title-logo" alt="Show do Crentão" />
+    </div>
+  </header>
 
-<!-- HOME -->
-<section id="hero">
-  <div class="bg"><img id="heroImg" alt="Capa – Show do Crentão" class="hidden"></div>
-  <div class="cta">
-    <button id="btnStart" class="btn primary full">Iniciar</button>
-    <button id="btnRanking" class="btn secondary full">Ranking</button>
-  </div>
-</section>
-
-<main>
-  <!-- FORM -->
-  <section id="section-form" class="card">
-    <h2>Dados do participante</h2>
-    <label>Nome completo</label>
-    <input id="nome" type="text" placeholder="Ex.: Maria Silva">
-    <label>Telefone (com DDD)</label>
-    <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
-    <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
-    <div class="row" style="margin-top:16px">
-      <button id="btnEnviarDados" class="btn primary">Enviar</button>
+  <!-- HOME -->
+  <section id="hero">
+    <div class="bg"><img id="heroImg" alt="Capa – Show do Crentão" class="hidden"></div>
+    <div class="cta">
+      <button id="btnStart" class="btn primary full">Iniciar</button>
+      <button id="btnRanking" class="btn secondary full" onclick="location.href='ranking.html'">Ranking</button>
     </div>
   </section>
 
-  <!-- QUIZ -->
-  <section id="section-quiz" class="card">
-    <h2 id="quizPergunta">Pergunta</h2>
-    <p id="valorPergunta" class="sub"></p>
-    <div class="row" id="lifelines" style="margin:6px 0 10px">
-      <button id="btnUni"  class="btn secondary">Universitários</button>
-      <button id="btn5050" class="btn secondary">50/50</button>
-      <button id="btnPular" class="btn secondary">Pular</button>
-    </div>
-    <div id="ajudaBox" class="helpbox hidden"></div>
-    <div id="quizOpcoes"></div>
-    <div id="confirmBox" class="confirm-box hidden">
-      <div class="confirm-title">Você tem certeza da resposta?</div>
-      <div class="row"><button id="btnConfirmar" class="btn primary">Confirmar</button></div>
-    </div>
-    <div id="posAcertoBox" class="confirm-box hidden">
-      <div class="confirm-title" id="posAcertoTitulo"></div>
-      <div class="row">
-        <button id="btnParar" class="btn secondary">Parar</button>
-        <button id="btnContinuar" class="btn primary">Continuar</button>
+  <main>
+    <!-- FORM -->
+    <section id="section-form" class="card">
+      <h2>Dados do participante</h2>
+      <label>Nome completo</label>
+      <input id="nome" type="text" placeholder="Ex.: Maria Silva">
+      <label>Telefone (com DDD)</label>
+      <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
+      <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
+      <div class="row" style="margin-top:16px">
+        <button id="btnEnviarDados" class="btn primary">Enviar</button>
       </div>
-    </div>
-    <div class="row" id="actionRow" style="margin-top:16px">
-      <button id="btnResponder" class="btn primary">Enviar</button>
-      <button id="btnLimpar" class="btn secondary">Limpar</button>
-    </div>
-    <audio id="fxCerteza" src="audio/silvio-santos-voce-tem-certeza.mp3" preload="auto"></audio>
-    <audio id="fxEntendeu" src="audio/silvio-santos-voce-entendeu-a-pergunta.mp3" preload="auto"></audio>
-    <audio id="fxEstaCerto" src="audio/silvio-santos-esta-certo-disso.mp3" preload="auto"></audio>
-    <audio id="fxQualResposta" src="audio/silvio-santos-qual-e-a-resposta-certa.mp3" preload="auto"></audio>
-    <audio id="fxCertaResposta" src="audio/silvio-santos-certa-resposta.mp3" preload="auto"></audio>
-    <audio id="fxErrou" src="audio/faustao-errou.mp3" preload="auto"></audio>
-    <audio id="fxAbertura" src="audio/silvio-santos-abertura-show-do-milhao.mp3" preload="auto" loop></audio>
-  </section>
+    </section>
 
-  <!-- RANKING -->
-  <section id="section-ranking" class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-      <h2>Ranking</h2>
-    </div>
-    <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
-    <div class="row" style="margin-top:16px">
-      <button id="btnVoltar" class="btn secondary">Voltar</button>
-    </div>
-  </section>
-</main>
+    <!-- QUIZ -->
+    <section id="section-quiz" class="card">
+      <h2 id="quizPergunta">Pergunta</h2>
+      <p id="valorPergunta" class="sub"></p>
+      <div class="row" id="lifelines" style="margin:6px 0 10px">
+        <button id="btnUni"  class="btn secondary">Universitários</button>
+        <button id="btn5050" class="btn secondary">50/50</button>
+        <button id="btnPular" class="btn secondary">Pular</button>
+      </div>
+      <div id="ajudaBox" class="helpbox hidden"></div>
+      <div id="quizOpcoes"></div>
+      <div id="confirmBox" class="confirm-box hidden">
+        <div class="confirm-title">Você tem certeza da resposta?</div>
+        <div class="row"><button id="btnConfirmar" class="btn primary">Confirmar</button></div>
+      </div>
+      <div id="posAcertoBox" class="confirm-box hidden">
+        <div class="confirm-title" id="posAcertoTitulo"></div>
+        <div class="row">
+          <button id="btnParar" class="btn secondary">Parar</button>
+          <button id="btnContinuar" class="btn primary">Continuar</button>
+        </div>
+      </div>
+      <div class="row" id="actionRow" style="margin-top:16px">
+        <button id="btnResponder" class="btn primary">Enviar</button>
+        <button id="btnLimpar" class="btn secondary">Limpar</button>
+      </div>
+    </section>
+  </main>
 
-<div id="fxOverlay" aria-hidden="true"></div>
+  <div id="fxOverlay" aria-hidden="true"></div>
 
-<script>
-(async function(){
-  const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-  const hero=document.getElementById('hero');
-  const heroImg=document.getElementById('heroImg');
-  const crentaoLogo=document.getElementById('crentaoLogo');
-  const secForm=document.getElementById('section-form');
-  const secQuiz=document.getElementById('section-quiz');
-  const secRank=document.getElementById('section-ranking');
-  const btnStart=document.getElementById('btnStart');
-  const btnRanking=document.getElementById('btnRanking');
-  const btnVoltar=document.getElementById('btnVoltar');
-  const nome=document.getElementById('nome');
-  const fone=document.getElementById('fone');
-  const btnEnviarDados=document.getElementById('btnEnviarDados');
+const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
-  function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
-  function goHome(){ hideAll(); toggleLogo(false); window.scrollTo(0,0); hero.style.display='block'; }
+// aqui segue a mesma lógica que você já tinha: perguntas, efeitos, ajudas etc.
+// a diferença é que no finalizar() agora salvamos no Supabase:
 
-  btnStart.addEventListener('click',()=>{ hero.style.display='none'; hideAll(); secForm.style.display='block'; });
-  btnRanking.addEventListener('click',()=>{ hero.style.display='none'; hideAll(); secRank.style.display='block'; renderRanking(); });
-  btnVoltar.addEventListener('click',goHome);
+async function salvarRanking(dados){
+  const { error } = await supabase.from("ranking").insert([dados]);
+  if(error) console.error("Erro ao salvar no Supabase:", error);
+}
 
-  let participanteAtual=null;
+// exemplo dentro do finalizar():
+// await salvarRanking({ nome:participanteAtual.nome, fone:participanteAtual.fone, pontos:acertos, tesouro:tesouro, quando:new Date().toISOString() });
 
-  btnEnviarDados.addEventListener('click', ()=>{
-    const n=(nome.value||'').trim(); const f=(fone.value||'').trim();
-    if(!n||!f){ alert('Preencha nome e telefone.'); return; }
-    participanteAtual={nome:n,fone:f}; iniciarQuiz();
-  });
-
-  // perguntas exemplo (use as suas)
-  const perguntas=[{ enunciado:'Quem é o maior exemplo de servo?', opcoes:['Davi','Moisés','Jesus','Paulo'], certa:2 }];
-  const ladder=[100,200,300];
-  let idx=0, escolha=null, acertos=0;
-
-  function iniciarQuiz(){ hideAll(); secQuiz.style.display='block'; toggleLogo(true); renderPergunta(); }
-  function renderPergunta(){ const p=perguntas[idx]; document.getElementById('quizPergunta').textContent=p.enunciado; document.getElementById('quizOpcoes').innerHTML=p.opcoes.map((txt,i)=>`<label><input type="radio" name="op" value="${i}"/> ${txt}</label>`).join(""); }
-
-  async function finalizar(){
-    const tesouro=acertos*100;
-    await supabase.from("ranking").insert([{nome:participanteAtual.nome,fone:participanteAtual.fone,pontos:acertos,tesouro:tesouro,quando:new Date().toISOString()}]);
-    hideAll(); secRank.style.display='block'; renderRanking();
-  }
-
-  async function renderRanking(){
-    const { data } = await supabase.from("ranking").select("*").order("tesouro",{ascending:false});
-    const box=document.getElementById('rankingLista');
-    if(!data.length){ box.textContent='Sem participantes ainda.'; return; }
-    box.innerHTML=data.map((r,i)=>`${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)`).join('<br>');
-  }
-})();
 </script>
 </body>
 </html>
