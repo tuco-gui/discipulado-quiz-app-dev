@@ -210,24 +210,47 @@
     }
 
     function renderPergunta(){
-  escolha = null;                               // zera seleção
-  const p = perguntas[idx];
+  escolha = null;
 
+  const p = perguntas[idx];
   elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
   elSub.textContent  = `Vale ${ladder[idx].toLocaleString('pt-BR')} talento(s) de sabedoria`;
-  elOps.innerHTML = '';
-  ajudaBox.classList.add('hidden'); ajudaBox.innerHTML = '';
-  showActions(); setLifelineButtons();
+  showActions();
+  setLifelineButtons();
 
-  // nome de grupo único evita restauração automática do browser
-  const group = `op_${idx}_${Date.now()}`;
+  // ——— recria o contêiner do bloco de opções (zera TODO o estado do browser)
+  const novo = elOps.cloneNode(false);      // mantém o mesmo elemento, sem filhos
+  elOps.parentNode.replaceChild(novo, elOps);
+  // IMPORTANTe: reatribui a referência global
+  window.elOps = novo;
 
-  p.opcoes.forEach((txt,i)=>{
+  // nome de grupo único + autocomplete off
+  const group = `op_${idx}_${Math.random().toString(36).slice(2)}`;
+
+  perguntas[idx].opcoes.forEach((txt,i)=>{
     const li = document.createElement('label');
     li.style.cssText = 'display:flex;gap:10px;align-items:center;margin:10px 0';
-    li.innerHTML = `<input type="radio" name="${group}" value="${i}" autocomplete="off" /> <span>${txt}</span>`;
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = group;
+    input.value = i;
+    input.autocomplete = 'off';
+    input.checked = false;
+    input.defaultChecked = false;
+    input.addEventListener('change', ()=>{ escolha = +input.value; });
+
+    const span = document.createElement('span');
+    span.textContent = txt;
+
+    li.appendChild(input);
+    li.appendChild(span);
     elOps.appendChild(li);
   });
+
+  // limpa a caixa de ajuda (se houver)
+  ajudaBox.classList.add('hidden');
+  ajudaBox.innerHTML = '';
+}
 
   // garante que nenhum veio marcado e registra mudanças
   elOps.querySelectorAll(`input[name="${group}"]`).forEach(r=>{
