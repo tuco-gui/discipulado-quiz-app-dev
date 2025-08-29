@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Show do Crentão — Sobrenatural Church</title>
   <meta name="theme-color" content="#000000" />
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     :root{
       --bg:#000; --green:#1fddac; --green-700:#0fa17e; --white:#ffffff;
@@ -16,55 +17,56 @@
     html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
     img{display:block;max-width:100%}
     .hidden{display:none !important}
-    header{position:fixed; inset:0 0 auto 0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 var(--pad); z-index:40; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));}
+
+    /* HEADER */
+    header{position:fixed; inset:0 0 auto 0; height:56px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 var(--pad); z-index:40; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));}
     .brand, .right{pointer-events:auto; display:flex; align-items:center; gap:12px;}
     .brand img{height:22px; opacity:.95}
     .title-logo{height:26px; opacity:.96; filter: drop-shadow(0 2px 8px rgba(0,0,0,.45)); display:none;}
     @media (max-width:768px){ .title-logo{height:22px;} }
-    #hero{position:relative; min-height:100svh; display:flex; align-items:flex-end; justify-content:center; padding: calc(56px + 10svh) var(--pad) calc(20svh); background:#000; overflow:hidden; opacity:1; transform:none;}
+
+    /* HERO */
+    #hero{position:relative; min-height:100svh; display:flex; align-items:flex-end; justify-content:center;
+      padding: calc(56px + 10svh) var(--pad) calc(20svh); background:#000; overflow:hidden; opacity:1; transform:none;}
     #hero .bg{ position:absolute; inset:0; z-index:0; display:grid; place-items:center;}
     #heroImg{ width:100%; height:100%; object-fit:cover; user-select:none; -webkit-user-drag:none; filter:none; }
     @media (max-width: 768px){
       #hero{padding: calc(56px + 6svh) var(--pad) calc(18svh);}
       #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
     }
-    #hero .cta{ position:absolute; left:50%; transform:translateX(-50%); bottom: calc(12svh + env(safe-area-inset-bottom)); width:100%; max-width: min(780px, 92vw); display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;}
-    .btn{appearance:none; border:0; border-radius:18px; padding:18px 28px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; cursor:pointer; box-shadow: var(--shadow); transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;}
+
+    /* Botões */
+    #hero .cta{position:absolute; left:50%; transform:translateX(-50%);
+      bottom: calc(12svh + env(safe-area-inset-bottom)); width:100%; max-width: min(780px, 92vw);
+      display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:2;}
+    .btn{appearance:none; border:0; border-radius:18px; padding:18px 28px; font-weight:800; letter-spacing:.02em;
+      text-transform:uppercase; cursor:pointer; box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease, filter .2s ease;}
     .btn:active{transform: translateY(1px); box-shadow: var(--shadow-soft);}
     .btn.primary{ background:linear-gradient(180deg, var(--green) 0%, var(--green-700) 100%); color:#06261f; }
     .btn.secondary{ background:var(--white); color:#0a0d0c }
     .btn.full{ flex:1 1 320px; }
+
+    /* CONTEÚDO */
     main{display:grid; gap:28px; padding:24px var(--pad) 48px; max-width:var(--maxw); margin:0 auto}
-    .card{background:rgba(12,15,15,.72); backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); box-shadow:var(--shadow); padding: min(28px, 3.2vw);}
+    .card{background:rgba(12,15,15,.72); backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.06);
+      border-radius:var(--radius); box-shadow:var(--shadow); padding: min(28px, 3.2vw);}
     h2{margin:0 0 6px; font-size:22px}
     .sub{margin:0 0 14px; font-size:14px; color:#a7b1af}
     label{display:block; font-size:14px; margin:14px 0 6px; color:#cdd5d3}
-    input[type="text"], input[type="tel"]{width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0b0f0e; color:#fff; outline:none;}
+    input[type="text"], input[type="tel"]{width:100%; padding:14px 16px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.08); background:#0b0f0e; color:#fff; outline:none;}
     .help{font-size:13px; color:#93a29f; margin-top:10px}
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .row .btn{min-width:180px}
     #section-form, #section-quiz, #section-ranking{display:none}
-    .confirm-box{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0a0f0f; }
-    .confirm-title{font-weight:800; margin-bottom:10px;}
-    .helpbox{margin-top:12px; font-size:13px; color:#a7b1af}
-    #fxOverlay{ position:fixed; inset:0; pointer-events:none; z-index:60; }
-    .fx-ok::after{content:""; position:absolute; inset:0; margin:auto; width:min(55vmin,520px); height:min(55vmin,520px); border-radius:50%; background:radial-gradient(ellipse at center, rgba(31,221,172,.28), rgba(31,221,172,0) 60%); animation:okPulse .95s ease-out forwards;}
-    @keyframes okPulse{ 0%{transform:scale(.7); opacity:.0} 25%{opacity:.9} 100%{transform:scale(1.15); opacity:0} }
-    .fx-wrong{ animation:shake .6s ease-in-out 0s 1; }
-    .fx-wrong::after{content:""; position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(242,78,58,.18), rgba(242,78,58,0) 65%); animation:fadeOut .8s ease forwards;}
-    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-    @keyframes fadeOut{ from{opacity:.9} to{opacity:0} }
   </style>
 </head>
 <body>
-
   <header>
-    <div class="brand">
-      <img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'">
-    </div>
-    <div class="right">
-      <img id="crentaoLogo" class="title-logo" alt="Show do Crentão" />
-    </div>
+    <div class="brand"><img src="img/logo.png" alt="Sobrenatural Church" onerror="this.style.display='none'"></div>
+    <div class="right"><img id="crentaoLogo" class="title-logo" alt="Show do Crentão" /></div>
   </header>
 
   <!-- HOME -->
@@ -72,73 +74,59 @@
     <div class="bg"><img id="heroImg" alt="Capa – Show do Crentão" class="hidden"></div>
     <div class="cta">
       <button id="btnStart" class="btn primary full">Iniciar</button>
-      <button id="btnRanking" class="btn secondary full" onclick="location.href='ranking.html'">Ranking</button>
+      <button id="btnRanking" class="btn secondary full">Ranking</button>
     </div>
   </section>
 
+  <!-- RANKING -->
   <main>
-    <!-- FORM -->
-    <section id="section-form" class="card">
-      <h2>Dados do participante</h2>
-      <label>Nome completo</label>
-      <input id="nome" type="text" placeholder="Ex.: Maria Silva">
-      <label>Telefone (com DDD)</label>
-      <input id="fone" type="tel" placeholder="Ex.: (14) 99999-0000">
-      <div class="help">Cada pessoa pode responder <strong>uma única vez</strong>.</div>
-      <div class="row" style="margin-top:16px">
-        <button id="btnEnviarDados" class="btn primary">Enviar</button>
-      </div>
-    </section>
-
-    <!-- QUIZ -->
-    <section id="section-quiz" class="card">
-      <h2 id="quizPergunta">Pergunta</h2>
-      <p id="valorPergunta" class="sub"></p>
-      <div class="row" id="lifelines" style="margin:6px 0 10px">
-        <button id="btnUni"  class="btn secondary">Universitários</button>
-        <button id="btn5050" class="btn secondary">50/50</button>
-        <button id="btnPular" class="btn secondary">Pular</button>
-      </div>
-      <div id="ajudaBox" class="helpbox hidden"></div>
-      <div id="quizOpcoes"></div>
-      <div id="confirmBox" class="confirm-box hidden">
-        <div class="confirm-title">Você tem certeza da resposta?</div>
-        <div class="row"><button id="btnConfirmar" class="btn primary">Confirmar</button></div>
-      </div>
-      <div id="posAcertoBox" class="confirm-box hidden">
-        <div class="confirm-title" id="posAcertoTitulo"></div>
-        <div class="row">
-          <button id="btnParar" class="btn secondary">Parar</button>
-          <button id="btnContinuar" class="btn primary">Continuar</button>
-        </div>
-      </div>
-      <div class="row" id="actionRow" style="margin-top:16px">
-        <button id="btnResponder" class="btn primary">Enviar</button>
-        <button id="btnLimpar" class="btn secondary">Limpar</button>
-      </div>
+    <section id="section-ranking" class="card">
+      <h2>Ranking</h2>
+      <div id="rankingLista" class="help">Sem participantes por enquanto.</div>
+      <div class="row" style="margin-top:16px"><button id="btnVoltar" class="btn secondary">Voltar</button></div>
     </section>
   </main>
 
-  <div id="fxOverlay" aria-hidden="true"></div>
+<script>
+(async function(){
+  // === Supabase ===
+  const { createClient } = window.supabase;
+  const supabaseUrl = "https://ihajmegcdgwchxslnaep.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-<script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
+  // === Refs ===
+  const hero = document.getElementById("hero");
+  const heroImg = document.getElementById("heroImg");
+  const secRank = document.getElementById("section-ranking");
+  const btnStart = document.getElementById("btnStart");
+  const btnRanking = document.getElementById("btnRanking");
+  const btnVoltar = document.getElementById("btnVoltar");
 
-const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  // === Imagem da capa (fallback) ===
+  const capas = ["img/cover.png","img/cover.jpg","img/cover.webp","img/capa.png","img/capa.jpg","img/show-crentao-bg.png","img/show-crentao-bg.jpg","img/logosc.png"];
+  for (const src of capas){
+    const ok = await new Promise(res=>{const i=new Image(); i.onload=()=>res(true); i.onerror=()=>res(false); i.src=src;});
+    if(ok){ heroImg.src=src; heroImg.classList.remove("hidden"); break; }
+  }
 
-// aqui segue a mesma lógica que você já tinha: perguntas, efeitos, ajudas etc.
-// a diferença é que no finalizar() agora salvamos no Supabase:
+  // === Navegação ===
+  btnStart.addEventListener("click", ()=>{ hero.style.display="none"; alert("Início do Quiz (aqui vai a lógica do quiz)"); });
+  btnRanking.addEventListener("click", async ()=>{
+    hero.style.display="none"; secRank.style.display="block"; renderRanking();
+  });
+  btnVoltar.addEventListener("click", ()=>{ secRank.style.display="none"; hero.style.display="block"; });
 
-async function salvarRanking(dados){
-  const { error } = await supabase.from("ranking").insert([dados]);
-  if(error) console.error("Erro ao salvar no Supabase:", error);
-}
-
-// exemplo dentro do finalizar():
-// await salvarRanking({ nome:participanteAtual.nome, fone:participanteAtual.fone, pontos:acertos, tesouro:tesouro, quando:new Date().toISOString() });
-
+  // === Ranking ===
+  async function renderRanking(){
+    const { data, error } = await supabase.from("ranking").select("*").order("tesouro",{ascending:false}).order("pontos",{ascending:false});
+    const box=document.getElementById("rankingLista");
+    if(error || !data.length){ box.textContent="Sem participantes por enquanto."; return; }
+    box.innerHTML = data.map((r,i)=> `${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)`)
+      .map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join("");
+  }
+})();
 </script>
 </body>
 </html>
+
