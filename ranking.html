@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Ranking — Show do Crentão</title>
+  <style>
+    body { background:#000; color:#fff; font-family: system-ui; padding:20px; }
+    .card{ background:#111; padding:20px; border-radius:12px; max-width:600px; margin:auto; }
+    h2{ margin-top:0; }
+    .linha{ padding:8px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+    button{ padding:10px 16px; border-radius:8px; border:none; cursor:pointer; margin-top:14px; }
+    .danger{ background:#e33; color:#fff; }
+  </style>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <div class="card">
+    <h2>Ranking Geral</h2>
+    <div id="rankingLista">Carregando...</div>
+    <button onclick="limparRanking()" class="danger">Apagar Ranking</button>
+  </div>
+
+<script>
+const SUPABASE_URL = "https://ihajmegcdgwchxslnaep.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function carregarRanking(){
+  const { data, error } = await supabase
+    .from("ranking")
+    .select("*")
+    .order("tesouro", { ascending: false })
+    .order("pontos", { ascending: false });
+
+  if(error){ document.getElementById("rankingLista").innerText="Erro ao carregar."; return; }
+
+  if(!data.length){ document.getElementById("rankingLista").innerText="Sem participantes ainda."; return; }
+
+  document.getElementById("rankingLista").innerHTML = data.map((r,i)=>
+    `<div class="linha">${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro} talento(s) · ${r.pontos} acerto(s)</div>`
+  ).join("");
+}
+
+async function limparRanking(){
+  if(confirm("Tem certeza que deseja apagar todo o ranking?")){
+    const { error } = await supabase.from("ranking").delete().neq("id", 0);
+    if(error) alert("Erro ao limpar ranking");
+    else{ alert("Ranking apagado!"); carregarRanking(); }
+  }
+}
+
+carregarRanking();
+</script>
+</body>
+</html>
