@@ -210,14 +210,16 @@
     }
 
     function renderPergunta(){
-      const p=perguntas[idx]
-      elPerg.textContent=`Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`
-      elSub.textContent=`Vale ${ladder[idx].toLocaleString('pt-BR')} talento(s) de sabedoria`
-      elOps.innerHTML=''; ajudaBox.classList.add('hidden'); ajudaBox.innerHTML=''
-      showActions(); setLifelineButtons()
-      p.opcoes.forEach((txt,i)=>{const li=document.createElement('label');li.style.cssText='display:flex;gap:10px;align-items:center;margin:10px 0';li.innerHTML=`<input type="radio" name="op" value="${i}" /> <span>${txt}</span>`;elOps.appendChild(li)})
-      elOps.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{escolha=+r.value}))
-    }
+  escolha=null; // zera a seleção da pergunta anterior
+  const p=perguntas[idx];
+  elPerg.textContent=`Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
+  elSub.textContent=`Vale ${ladder[idx].toLocaleString('pt-BR')} talento(s) de sabedoria`;
+  elOps.innerHTML=''; ajudaBox.classList.add('hidden'); ajudaBox.innerHTML='';
+  showActions(); setLifelineButtons();
+  p.opcoes.forEach((txt,i)=>{const li=document.createElement('label');li.style.cssText='display:flex;gap:10px;align-items:center;margin:10px 0';li.innerHTML=`<input type="radio" name="op" value="${i}" /> <span>${txt}</span>`;elOps.appendChild(li)});
+  elOps.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{escolha=+r.value}))
+}
+
 
     btnUni.addEventListener('click',()=>{
       if(!lifelines.uni) return; lifelines.uni=false; setLifelineButtons()
