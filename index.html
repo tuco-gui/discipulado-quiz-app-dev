@@ -44,7 +44,7 @@
       #heroImg{ object-fit:contain; aspect-ratio:auto; object-position: center 70px; }
     }
 
-    /* ✅ Fixa os botões no rodapé do hero */
+    /* Botões ancorados no rodapé do hero */
     #hero .cta{
       position:absolute; left:50%; transform:translateX(-50%);
       bottom: calc(12svh + env(safe-area-inset-bottom));
@@ -71,7 +71,8 @@
       border:1px solid rgba(255,255,255,.06); border-radius:var(--radius);
       box-shadow:var(--shadow); padding: min(28px, 3.2vw);
     }
-    h2{margin:0 0 14px; font-size:22px}
+    h2{margin:0 0 6px; font-size:22px}
+    .sub{margin:0 0 14px; font-size:14px; color:#a7b1af}
     label{display:block; font-size:14px; margin:14px 0 6px; color:#cdd5d3}
     input[type="text"], input[type="tel"]{
       width:100%; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
@@ -149,6 +150,7 @@
 
     <section id="section-quiz" class="card">
       <h2 id="quizPergunta">Pergunta</h2>
+      <p id="valorPergunta" class="sub"></p>
       <div id="quizOpcoes"></div>
 
       <div id="confirmBox" class="confirm-box hidden">
@@ -242,14 +244,11 @@
   }
   function hideAll(){ secForm.style.display='none'; secQuiz.style.display='none'; secRank.style.display='none'; }
   function toggleLogo(show){ crentaoLogo.style.display = show ? '' : 'none'; }
-
   function goHome(){
-    hideAll();
-    stopAllFx();
-    toggleLogo(false);
-    window.scrollTo(0,0);                    // ✅ garante topo da página
+    hideAll(); stopAllFx(); toggleLogo(false);
+    window.scrollTo(0,0);
     hero.style.display='block';
-    hero.style.transition='';                // ✅ limpa transição anterior
+    hero.style.transition='';
     hero.style.opacity='1';
     hero.style.transform='none';
   }
@@ -319,25 +318,50 @@
     iniciarQuiz();
   });
 
-  /* ---------- quiz ---------- */
+  /* ---------- perguntas (16) ---------- */
   const perguntas = [
-    { enunciado:"O que é fé genuína segundo o estudo?",
-      opcoes:["Fé baseada no testemunho de outras pessoas.","Fé emocional despertada em um culto.","Fé verdadeira e pessoal, que cresce com exercício.","Fé herdada de familiares."],
-      certa:2 },
-    { enunciado:"Qual foi o primeiro aspecto importante na vida de Abraão?",
-      opcoes:["Obediência imediata","Caridade","Riqueza","Fama"],
-      certa:0 },
-    { enunciado:"A obediência, segundo a aula, é sobretudo…",
-      opcoes:["um ato de submissão cega.","uma expressão de amor e confiança em Deus.","uma tradição da igreja.","uma estratégia para evitar problemas."],
-      certa:1 },
-    { enunciado:"Qual é a característica primordial do cristão destacada na aula?",
-      opcoes:["Popularidade","Prosperidade","Perseverança","Carisma"],
-      certa:2 }
+    { enunciado:"Qual era a principal característica de Abraão que o tornou conhecido como \"pai da fé\"?",
+      opcoes:["Coragem nas batalhas","Obediência imediata","Riquezas herdadas","Ser sacerdote em sua terra"], certa:1 },
+    { enunciado:"Segundo o discipulado, qual é o propósito original do cristão?",
+      opcoes:["Servir","Ensinar","Louvar","Jejuar"], certa:0 },
+    { enunciado:"Quem é o maior exemplo de servo na Terra?",
+      opcoes:["Davi","Moisés","Jesus","Paulo"], certa:2 },
+    { enunciado:"Complete: \"Servir é para pessoas ___\".",
+      opcoes:["Imaturas","Orgulhosas","Santas","Maduras"], certa:3 },
+    { enunciado:"O que significa “obediência imediata” na vida cristã?",
+      opcoes:["Responder sem demora ao que Deus ordena","Esperar sinais antes de agir","Fazer somente parte do que foi pedido","Obedecer apenas quando for conveniente"], certa:0 },
+    { enunciado:"Segundo o discipulado, a fé é comparada a quê?",
+      opcoes:["Uma árvore","Um músculo","Uma chama","Um tesouro"], certa:1 },
+    { enunciado:"Qual é a diferença entre ser voluntário e ser servo?",
+      opcoes:["O voluntário foca em tarefas; o servo foca em propósito","O voluntário recebe recompensa; o servo não","O voluntário sempre tem menos valor que o servo","O servo não pode errar, o voluntário pode"], certa:0 },
+    { enunciado:"De acordo com o discipulado, qual é a chave para obtermos o respaldo de Deus?",
+      opcoes:["Santidade","Oração longa","Ser voluntário","Conhecimento teológico"], certa:0 },
+    { enunciado:"Quais são os três elementos que levam a cumprir o propósito de Deus?",
+      opcoes:["Fé, oração, jejum","Obediência, fé genuína, perseverança","Dons, talentos, carisma","Conhecimento, obras, disciplina"], certa:1 },
+    { enunciado:"Qual foi o propósito do preparo de Jesus durante 30 anos antes do ministério público?",
+      opcoes:["Aprender sobre política","Preparar-se para servir","Tornar-se mestre da Lei","Receber poder sobrenatural"], certa:1 },
+    { enunciado:"Cite duas características de um servo com visão de líder.",
+      opcoes:["Busca status e poder","É escolhido em tempos de crise e estabelece limites de integridade","Nunca enfrenta tentações e sempre tem dons","Vive isolado do povo e evita responsabilidades"], certa:1 },
+    { enunciado:"Quais são as consequências de perder a santidade, segundo o discipulado?",
+      opcoes:["Ter sonhos ruins e sentir medo","Tornar-se escravo, perder visão, ser escarnecido, e morte","Perder amigos, recursos financeiros e ministério","Ter enfermidades e perder dons espirituais"], certa:1 },
+    { enunciado:"O que pode afetar a santidade de um cristão?",
+      opcoes:["Confiar demais na carne, brincar com tentações, jugo desigual","Orar em línguas, jejuar em excesso, ler pouco","Amar demais as pessoas, trabalhar muito, estudar pouco","Estar em crise, passar por desertos, enfrentar tentações"], certa:0 },
+    { enunciado:"Sansão foi separado por Deus para ser libertador. O que o levou à queda?",
+      opcoes:["Falta de dons espirituais","Desobediência a seus pais","Falta de cuidado no relacionamento com Deus","Perseguição dos filisteus"], certa:2 },
+    { enunciado:"Segundo o discipulado, qual é a relação entre santidade e efetividade no Reino de Deus?",
+      opcoes:["Santidade garante apenas a salvação eterna","Santidade é necessária para ter respaldo e comunhão com Deus","Santidade é opcional se houver obediência","Santidade só é exigida dos líderes"], certa:1 },
+    { enunciado:"Qual é o processo completo para restaurar a santidade, segundo o discipulado?",
+      opcoes:["Orar, jejuar e se esforçar mais","Arrependimento, favor de Deus, renovação da unção, deixar o pecado, compromisso com Deus","Estudar a Bíblia, cantar louvores, congregar","Seguir regras da igreja e evitar pecados visíveis"], certa:1 }
   ];
+
+  /* ---------- escada de “prêmios” (talentos de sabedoria) ---------- */
+  const ladder = [100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,300000,500000,750000,1000000];
+  const safeIdx = new Set([4,9,14]); // níveis de segurança (0-based)
 
   let idx = 0, escolha = null, acertos = 0;
 
   const elPerg     = document.getElementById('quizPergunta');
+  const elSub      = document.getElementById('valorPergunta');
   const elOps      = document.getElementById('quizOpcoes');
   const actionRow  = document.getElementById('actionRow');
   const btnResp    = document.getElementById('btnResponder');
@@ -358,6 +382,7 @@
   function renderPergunta(){
     const p = perguntas[idx];
     elPerg.textContent = `Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
+    elSub.textContent  = `Vale ${ladder[idx].toLocaleString('pt-BR')} talento(s) de sabedoria`;
     elOps.innerHTML = '';
     showActions();
 
@@ -382,12 +407,19 @@
   btnConf.addEventListener('click', async ()=>{
     stopAllFx();
     const ok = (escolha === perguntas[idx].certa);
+
     if(ok){ acertos++; await Promise.all([playAndWait(fxCerta), showFx('ok')]); }
     else  { await Promise.all([playAndWait(fxErrou),  showFx('wrong')]); }
 
     idx++; escolha=null;
-    if(idx < perguntas.length){ renderPergunta(); canPlay(fxEntendeu); }
-    else { finalizar(); }
+
+    if(idx < perguntas.length && ok){
+      renderPergunta(); canPlay(fxEntendeu);
+    } else if(idx < perguntas.length && !ok){
+      finalizar(); // errou antes do final
+    } else {
+      finalizar(); // terminou as 16
+    }
   });
 
   btnLimpar.addEventListener('click', ()=>{
@@ -396,18 +428,37 @@
   });
 
   /* ---------- ranking ---------- */
+  function calculaTesouro(){
+    if (acertos === perguntas.length) return ladder[ladder.length-1];
+    // índice da última pergunta acertada é acertos-1
+    let premioSeguranca = 0;
+    for (let i=0;i<acertos;i++){
+      if (safeIdx.has(i)) premioSeguranca = ladder[i];
+    }
+    return premioSeguranca;
+  }
+
   function finalizar(){
+    const tesouro = calculaTesouro();
     const rank = LS.get('ranking', []);
-    rank.push({ nome: participanteAtual.nome, fone: participanteAtual.fone, pontos: Number(acertos)||0, quando: Date.now() });
-    rank.sort((a,b)=> b.pontos - a.pontos || a.quando - b.quando);
+    rank.push({
+      nome: participanteAtual.nome,
+      fone: participanteAtual.fone,
+      pontos: Number(acertos)||0,     // guardo acertos para desempate
+      tesouro: Number(tesouro)||0,    // talentos de sabedoria
+      quando: Date.now()
+    });
+    // ordena por talentos, depois por acertos, depois por data
+    rank.sort((a,b)=> b.tesouro - a.tesouro || b.pontos - a.pontos || a.quando - b.quando);
     LS.set('ranking', rank);
     hideAll(); toggleLogo(true); secRank.style.display='block'; renderRanking();
   }
+
   function renderRanking(){
     const rank = LS.get('ranking', []);
     const box = document.getElementById('rankingLista');
     if(!rank.length){ box.textContent = 'Sem participantes por enquanto.'; return; }
-    const linhas = rank.map((r,i)=> `${i+1}. ${r.nome} — ${r.fone} — ${r.pontos} ponto(s)`);
+    const linhas = rank.map((r,i)=> `${i+1}. ${r.nome} — ${r.fone} — ${r.tesouro.toLocaleString('pt-BR')} talento(s) · ${r.pontos} acerto(s)`);
     box.innerHTML = linhas.map(l=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">${l}</div>`).join('');
   }
 
