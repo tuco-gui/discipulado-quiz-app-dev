@@ -1,0 +1,72 @@
+<!doctype html>
+escolha = null;
+const p=perguntas[idx];
+elPerg.textContent=`Pergunta ${idx+1} de ${perguntas.length}: ${p.enunciado}`;
+elSub.textContent=`Vale ${ladder[idx].toLocaleString('pt-BR')} talento(s) de sabedoria`;
+showActions(); setLifelineButtons();
+
+
+// recria container p/ zerar qualquer estado prévio do navegador
+const novo = elOps.cloneNode(false); elOps.parentNode.replaceChild(novo, elOps); elOps = novo;
+const group = `op_${idx}_${Math.random().toString(36).slice(2)}`;
+
+
+p.opcoes.forEach((txt,i)=>{
+const li=document.createElement('label'); li.style.cssText='display:flex;gap:10px;align-items:center;margin:10px 0';
+const input=document.createElement('input'); input.type='radio'; input.name=group; input.value=i; input.autocomplete='off'; input.checked=false; input.defaultChecked=false; input.addEventListener('change',()=>{escolha=+input.value});
+const span=document.createElement('span'); span.textContent=txt;
+li.appendChild(input); li.appendChild(span); elOps.appendChild(li);
+});
+ajudaBox.classList.add('hidden'); ajudaBox.innerHTML='';
+}
+
+
+/* Ajudas */
+btnUni.addEventListener('click', ()=>{ if(!lifelines.uni) return; lifelines.uni=false; setLifelineButtons(); const correta=perguntas[idx].certa; let votos=[0,0,0,0]; let base=60+Math.floor(Math.random()*16); votos[correta]=base; let resto=100-base; const indices=[0,1,2,3].filter(i=>i!==correta); indices.forEach((i,k)=>{ const part = k<indices.length-1 ? Math.floor(Math.random()*(resto-(indices.length-1-k))) : resto; votos[i]=part; resto-=part; }); ajudaBox.innerHTML = 'Universitários: ' + votos.map((v,i)=>`<br>(${String.fromCharCode(65+i)}) ${v}%`).join(''); ajudaBox.classList.remove('hidden'); });
+
+
+btn5050.addEventListener('click', ()=>{ if(!lifelines.fifty) return; lifelines.fifty=false; setLifelineButtons(); const correta=perguntas[idx].certa; const erradas=[0,1,2,3].filter(i=>i!==correta); while (erradas.length>1) { const remove=erradas.splice(Math.floor(Math.random()*erradas.length),1)[0]; const input=elOps.querySelector(`input[value="${remove}"]`); if(input){ input.disabled=true; input.parentElement.style.opacity=.35; } } });
+
+
+btnPular.addEventListener('click', ()=>{ if(!lifelines.skip) return; lifelines.skip=false; setLifelineButtons(); idx++; if(idx<perguntas.length){ renderPergunta(); canPlay(fxEntendeu); } else { finalizar(false,true); } });
+
+
+/* fluxo de resposta */
+btnResp.addEventListener('click', ()=>{ if(escolha===null){ canPlay(fxCerteza); return; } showConfirm(); stopAllFx(); canPlay([fxCerteza,fxEstaCerto,fxQualResposta][idx % 3]); });
+
+
+btnConf.addEventListener('click', async ()=>{
+stopAllFx(); const ok=(escolha===perguntas[idx].certa);
+if(ok){
+acertos++; await Promise.all([playAndWait(fxCerta), showFx('ok')]); const ganhoAtual = ladder[idx].toLocaleString('pt-BR'); posTitulo.textContent = `Acertou! Você já tem ${ganhoAtual} talento(s). Deseja PARAR agora ou CONTINUAR?`; showPosAcerto();
+btnParar.onclick = ()=> finalizar(true, false);
+btnContinuar.onclick = ()=>{ idx++; if(idx<perguntas.length){ renderPergunta(); canPlay(fxEntendeu); } else { finalizar(false, false); } };
+} else { await Promise.all([playAndWait(fxErrou), showFx('wrong')]); finalizar(false, false, true); }
+});
+
+
+btnLimpar.addEventListener('click', ()=>{ elOps.querySelectorAll('input[type=radio]').forEach(r=>{ r.checked=false; r.defaultChecked=false; }); escolha=null; });
+
+
+/* ranking / pontuação */
+function calculaCheckpoint(){ if (acertos===0) return 0; if (acertos===perguntas.length) return ladder[ladder.length-1]; let premio=0; for (let i=0;i<acertos;i++){ if(safeIdx.has(i)) premio=ladder[i]; } return premio; }
+
+
+// finalizar(parouVoluntariamente=false, pulouNoFim=false, errou=false)
+async function finalizar(parou=false, pulouNoFim=false, errou=false){
+let tesouro=0; if (parou) { tesouro = ladder[idx]; } else if (errou) { tesouro = calculaCheckpoint(); } else { tesouro = acertos===perguntas.length ? ladder[ladder.length-1] : calculaCheckpoint(); }
+
+
+try{
+await sbInsert({ nome:participanteAtual.nome, fone:participanteAtual.fone, pontos:Number(acertos)||0, tesouro:Number(tesouro)||0, quando:new Date().toISOString() });
+}catch(e){ console.error('Erro ao gravar no Supabase', e); }
+
+
+const msg = parou ? `Você decidiu parar com ${tesouro.toLocaleString('pt-BR')} talento(s)!` : (errou? `Não foi dessa vez. Você garantiu ${tesouro.toLocaleString('pt-BR')} talento(s).` : `Parabéns! Você concluiu o jogo com ${tesouro.toLocaleString('pt-BR')} talento(s)!`);
+alert(msg + '\nVamos para o ranking.');
+location.href = 'ranking.html';
+}
+})();
+</script>
+</body>
+</html>
