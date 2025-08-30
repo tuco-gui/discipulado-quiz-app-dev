@@ -1,57 +1,87 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Ranking — Show do Crentão</title>
-  <meta name="theme-color" content="#000000" />
-  <style>
-    :root{ --bg:#000; --card:#0c0f0f; --white:#fff; --muted:#aab3b1; --radius:14px; --pad: clamp(16px,3vw,28px); --shadow:0 12px 40px rgba(0,0,0,.45); }
-    *{box-sizing:border-box} html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto}
-    main{max-width:960px;margin:0 auto;padding:24px var(--pad) 64px;display:grid;gap:18px}
-    .card{background:rgba(12,15,15,.72);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:min(28px,3.2vw)}
-    h1{margin:0 0 12px} .help{color:#a7b1af}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{appearance:none;border:0;border-radius:18px;padding:14px 22px;font-weight:800;cursor:pointer;box-shadow:var(--shadow)}
-    .btn.primary{background:linear-gradient(180deg,#1fddac 0%,#0fa17e 100%);color:#06261f}
-    .item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranking — Show do Crentão</title>
+<meta name="theme-color" content="#000000">
+<style>
+  :root{--bg:#000;--card:#0c0f0f;--muted:#aab3b1;--white:#fff;--green:#1fddac;--radius:14px;--shadow:0 12px 40px rgba(0,0,0,.45);--pad:clamp(16px,3vw,28px);--maxw:900px}
+  *{box-sizing:border-box} html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+  main{max-width:var(--maxw);margin:0 auto;padding:28px var(--pad)}
+  .card{background:rgba(12,15,15,.78);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+  h1{margin:0 0 10px;font-size:22px}
+  .sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{appearance:none;border:0;border-radius:16px;padding:14px 22px;font-weight:800;text-transform:uppercase;cursor:pointer}
+  .btn.secondary{background:#fff;color:#0a0d0c}
+  .list{margin-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+  .item{display:grid;grid-template-columns:56px 1fr 120px 120px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+  .pos{display:flex;align-items:center;justify-content:center;font-weight:800;width:42px;height:42px;border-radius:50%;background:#111}
+  .gold{background:linear-gradient(180deg,#ffd76a,#f0b400);color:#3a2b00}
+  .silver{background:linear-gradient(180deg,#e8edf2,#c9d1d9);color:#2f3136}
+  .bronze{background:linear-gradient(180deg,#f0c2a1,#c07a45);color:#3b2417}
+  .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .muted{color:#9fb0ad;font-size:13px}
+  @media (max-width:720px){
+    .item{grid-template-columns:48px 1fr 92px 92px}
+  }
+</style>
 </head>
 <body>
-  <main class="card">
+<main>
+  <div class="card">
     <h1>Ranking</h1>
-    <div id="lista" class="help">Carregando…</div>
+    <p class="sub">Atualizado em tempo real a partir do Supabase.</p>
+    <div id="list" class="list"></div>
     <div class="row" style="margin-top:16px">
-      <button class="btn primary" onclick="location.href='index.html'">Voltar</button>
+      <button class="btn secondary" onclick="window.location.href='/'">Voltar</button>
     </div>
-  </main>
+  </div>
+</main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script>
-  (async function(){
-    const sb = supabase.createClient(
-      "https://ihajmegcdgwchxslnaep.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y"
-    );
-    const box = document.getElementById('lista');
+<script type="module">
+  // === CONFIG SUPABASE (usa suas credenciais) ===
+  const SUPABASE_URL = 'https://ihajmegcdgwchxslnaep.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYWptZWdjZGd3Y2h4c2xuYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0OTQzMTgsImV4cCI6MjA3MjA3MDMxOH0.WM36lA9n0PU9qd-DKdrWVB_UzGVXpsfJ984oHiXDU8Y';
+
+  // PostgREST direto
+  const headers = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
+
+  async function fetchRanking(){
+    const url = `${SUPABASE_URL}/rest/v1/ranking?select=nome,fone,tesouro,pontos,quando&order=tesouro.desc, pontos.desc, quando.asc`;
+    const r = await fetch(url, { headers });
+    if(!r.ok) throw new Error('Falha ao ler ranking');
+    return r.json();
+  }
+
+  function medal(i){
+    if (i===0) return {cls:'gold',   emoji:'🥇'};
+    if (i===1) return {cls:'silver', emoji:'🥈'};
+    if (i===2) return {cls:'bronze', emoji:'🥉'};
+    return {cls:'', emoji:(i+1)+'.'};
+  }
+
+  function render(list){
+    const box = document.getElementById('list');
+    box.innerHTML = list.map((r,i)=>{
+      const m = medal(i);
+      const pos = `<div class="pos ${m.cls}">${m.emoji}</div>`;
+      const nome = `<div class="name"><strong>${r.nome||'-'}</strong><div class="muted">${r.fone||''}</div></div>`;
+      const tes = `<div>${Number(r.tesouro||0).toLocaleString('pt-BR')} talento(s)</div>`;
+      const pts = `<div>${Number(r.pontos||0)} acerto(s)</div>`;
+      return `<div class="item">${pos}${nome}${tes}${pts}</div>`;
+    }).join('');
+  }
+
+  (async()=>{
     try{
-      const {data,error}=await sb.from('ranking')
-        .select('nome, fone, pontos, tesouro, quando')
-        .order('tesouro',{ascending:false})
-        .order('pontos',{ascending:false})
-        .order('quando',{ascending:true})
-        .limit(200);
-      if(error) throw error;
-      if(!data?.length){ box.textContent='Sem participantes por enquanto.'; return; }
-      box.innerHTML = data.map((r,i)=>{
-        const t=(+r.tesouro||0).toLocaleString('pt-BR');
-        return `<div class="item">${i+1}. ${r.nome} — ${r.fone} — ${t} talento(s) · ${r.pontos} acerto(s)</div>`;
-      }).join('');
+      const data = await fetchRanking();
+      render(data);
     }catch(e){
-      box.textContent = 'Falha ao carregar ranking.';
-      console.warn(e);
+      document.getElementById('list').innerHTML = `<div class="item"><div class="name">Erro: ${e.message}</div></div>`;
     }
   })();
-  </script>
+</script>
 </body>
 </html>
